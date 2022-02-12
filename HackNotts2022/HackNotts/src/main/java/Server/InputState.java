@@ -1,4 +1,4 @@
-package Main;
+package Server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +18,17 @@ public class InputState {
     public void UpdateState(String key, Integer value) {
         if (state.containsKey(key)) {
             state.put(key, value);
+        } else {
+            System.out.println("Key does not exist");
+        }
+    }
+
+    public int GetState(String key) {
+        if (state.containsKey(key)) {
+            return state.get(key);
+        } else {
+            System.out.println("Key does not exist");
+            return -1;
         }
     }
 

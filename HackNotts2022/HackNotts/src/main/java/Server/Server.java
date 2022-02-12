@@ -1,10 +1,10 @@
-package Main;
+package Server;
+
+import Main.Main;
 
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 public class Server {
     int portNo = 6969;
@@ -53,10 +53,14 @@ public class Server {
         } finally {if(aSocket != null) aSocket.close();}
     }
 
-    void SendMessage(String message, DatagramPacket request) {
+    public void SendMessage(String message, DatagramPacket request) {
+        SendMessage(message, request.getAddress(), request.getPort());
+    }
+
+    public void SendMessage(String message, InetAddress address, int port) {
         try {
             DatagramPacket reply = new DatagramPacket(message.getBytes(),
-                    message.length(), request.getAddress(), request.getPort());
+                    message.length(), address, port);
             aSocket.send(reply);
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,14 +76,20 @@ public class Server {
 
         for (char i : data.toCharArray()) {
             switch (i) {
-                case ('/'):
-                    int playerNo = Main.AddPlayer(Integer.parseInt(builder.toString()));
+                case (']'):
+                    int playerNo = 0;
+                    try {
+                        playerNo = PlayerManager.AddPlayer(Integer.parseInt(builder.toString()), request.getAddress(), request.getPort());
+                    } catch (NumberFormatException e) {
+                        ConnectionError(request);
+                        return;
+                    }
                     System.out.println("MachineID: " + builder);
 
                     InputStates.AddState(playerNo);
-                    SendMessage("ACCP-PN" + playerNo + "/-END", request);
-                    break;
-                case ('-'):
+                    SendMessage("ACCP[PN" + playerNo + "]", request);
+                    return;
+                case ('['):
                     builder = new StringBuilder();
                     break;
                 default:
@@ -89,7 +99,6 @@ public class Server {
             if (builder.toString().equals("ID")) {
                 builder = new StringBuilder();
             }
-
         }
     }
 
@@ -97,24 +106,36 @@ public class Server {
         StringBuilder builder = new StringBuilder();
         int playerNo = 0;
         String element = "";
-        for (char i : data.toCharArray()) {
-            if ((int)i > 47 && (int)i < 58 && element.isEmpty()) {
+
+        InputState state = new InputState();
+
+        loop: for (char i : data.toCharArray()) {
+            int sym = (int) i;
+            if (((sym > 47 && sym < 58) || sym == 45) && element.isEmpty()) {
                 element = builder.toString();
                 builder = new StringBuilder();
                 builder.append(i);
             } else {
                 switch (i) {
-                    case ('/'):
+                    case (']'):
+                    case ('_'):
                         int value = Integer.parseInt(builder.toString());
                         if (element.equals("ID")) {
-                            playerNo = Main.playerLookup.get(value);
+                            playerNo = PlayerManager.playerLookup.get(value).getPlayerNumber();
                             value = playerNo;
+                            try {
+                                InputStates.available.acquire();
+                                state = InputStates.GetState(playerNo);
+                                InputStates.available.release();
+                            } catch (InterruptedException e){}
                         }
-                        InputStates.ModifyState(playerNo, element, value);
+                        state.UpdateState(element, value);
                         builder = new StringBuilder();
                         element = "";
+
+                        if (i == ']') break loop;
                         break;
-                    case ('-'):
+                    case ('['):
                         builder = new StringBuilder();
                         break;
                     default:
@@ -122,6 +143,11 @@ public class Server {
                 }
             }
         }
-        System.out.print(InputStates.GetState(playerNo).ToString());
+        try {
+            InputStates.available.acquire();
+            InputStates.AddState(playerNo, state);
+            System.out.print(InputStates.GetState(playerNo).ToString());
+            InputStates.available.release();
+        } catch (InterruptedException e){};
     }
 }

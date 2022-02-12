@@ -2,42 +2,42 @@
 
 All numerical data should converted to a UTF-8 encoded string.
 
-Each Value should be terminated with a '/' character
+Each Value should be terminated with a '_' character
 
 ## Footers
-All requests end with -END
+All requests end with ']'
 
 
 ## Connection
 
 ### Header: 
-CONN-
+CONN_
 
 ### Definitions
 ID - Machine ID (Integer)
 
 ### Example:
-CONN-ID843128610/-END
+CONN[ID843128610]
 
 Connection from machine 843128610
 
 ## Connection Response
 
 ### Header:
-ACCP-
+ACCP[
 
 ### Definitions
 PN - Player Number (Integer)
 
 ### Example
-ACCP-PN1/-END
+ACCP[PN1]
 
 Accepted connection. You are player 1.
 
 ## Sending
 
 ### Header: 
-INPT-
+INPT[
 
 <br>
 
@@ -61,7 +61,7 @@ All are boolean values.
 
 ### Example
 
-INPT-ID843128610/L0/R1/J0/S1/E1/-END
+INPT[ID843128610_L0_R1_J0_S1_E1_]
 
 User input from machine 843128610
 Shows that the user isn't pressing: Left or Jump but is pressing Right and Shoot. And that the user is ready.
@@ -73,6 +73,8 @@ There can be any number of actors.
 ### Header:
 DATA-
 
+### Block Types
+A - Actor
 
 ### Definitions
 PX - X position (float)
@@ -85,13 +87,15 @@ SY - Y speed (float)
 
 <br>
 
-AS - Actor Start
+( - Actor Start
 
-AE - Actor End
+) - Actor End
 
 AT - Actor Type
 
 AN - Actor Number
+
+AX - Actor State
 
 ### Actor Types
 0 - Player
@@ -100,20 +104,28 @@ AN - Actor Number
 
 Actor Number corresponds to player numbers
 
+### Actor States
+
+0 - Alive
+
+1 - Dead
+
 ### Example
 
-DATA-ASAT0/AN1/PX100/PY100/SX1/SY0/AEASAT1/AN0/PX50/PY10/SX0/SY10/AE-END
+DATA[A(AT0_AN1_AX0_PX100_PY100_SX1_SY0)A(AT1_AN0_AX1_PX50_PY10_SX0_SY10)]
 
-|              | X   | Y   | Other  |
+| Actor     | X   | Y   | Other  |
 |--------------|-----|-----|--------|
 | Actor Type   |     |     | Player |
 | Actor Number |     |     | 1 |
+| Actor State |     |     | Alive |
 | Position     | 100 | 100 |        |
 | Speed        | 1   | 0   |        |
 
-|              | X  | Y  | Other  |
+| Actor     | X  | Y  | Other  |
 |--------------|----|----|--------|
 | Actor Type   |    |    | Bullet |
 | Actor Number |    |    | 0      |
+| Actor State |     |     | Dead |
 | Position     | 50 | 10 |        |
 | Speed        | 0  | 10 |        |

@@ -17,4 +17,5 @@ public class GameState {
 
         bullets.add(bullet);
     }
+
 }

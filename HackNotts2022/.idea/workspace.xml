@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="850a18ac-5945-4481-9b65-d1c4510b7f02" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/InputState.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/InputStates.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/7.1/dependencies-accessors/dependencies-accessors.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.1/dependencies-accessors/dependencies-accessors.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/7.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.1/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/7.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.1/executionHistory/executionHistory.lock" afterDir="false" />
@@ -14,11 +16,8 @@
       <change beforePath="$PROJECT_DIR$/.gradle/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/checksums/checksums.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HackNotts/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Bullet.java" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Bullet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Entity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HackNotts/src/main/java/Main/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/GameState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/HackNotts/src/main/java/Main/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

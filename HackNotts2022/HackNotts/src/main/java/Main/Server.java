@@ -3,6 +3,8 @@ package Main;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 public class Server {
     int portNo = 6969;
@@ -39,8 +41,8 @@ public class Server {
                     case ("CONN"):
                         ProcessConnection(connectionString, request);
                         break;
-                    /*case ("INPT"):
-                        ProcessInput(connectionString, request);*/
+                    case ("INPT"):
+                        ProcessInput(connectionString, request);
                     default:
                         ConnectionError(request);
                         break;
@@ -73,6 +75,7 @@ public class Server {
                     int playerNo = Main.AddPlayer(Integer.parseInt(builder.toString()));
                     System.out.println("MachineID: " + builder);
 
+                    InputStates.AddState(playerNo);
                     SendMessage("ACCP-PN" + playerNo + "/-END", request);
                     break;
                 case ('-'):
@@ -88,30 +91,36 @@ public class Server {
 
         }
     }
-    /*void ProcessInput(String data, DatagramPacket request) {
-        final String[] elements = new String[] {
-                ""
 
-        };
-
+    void ProcessInput(String data, DatagramPacket request) {
         StringBuilder builder = new StringBuilder();
+        int playerNo = 0;
         String element = "";
         for (char i : data.toCharArray()) {
-            switch (i) {
-                case ('/'):
-
-                    break;
-                case ('-'):
-                    builder = new StringBuilder();
-                    break;
-                default:
-                    builder.append(i);
-            }
-
-            if (builder.toString().equals("ID")) {
+            if ((int)i > 47 && (int)i < 58 && element.isEmpty()) {
+                element = builder.toString();
                 builder = new StringBuilder();
+                builder.append(i);
+            } else {
+                switch (i) {
+                    case ('/'):
+                        int value = Integer.parseInt(builder.toString());
+                        if (element.equals("ID")) {
+                            playerNo = Main.playerLookup.get(value);
+                            value = playerNo;
+                        }
+                        InputStates.ModifyState(playerNo, element, value);
+                        builder = new StringBuilder();
+                        element = "";
+                        break;
+                    case ('-'):
+                        builder = new StringBuilder();
+                        break;
+                    default:
+                        builder.append(i);
+                }
             }
-
         }
-    }*/
+        System.out.print(InputStates.GetState(playerNo).ToString());
+    }
 }

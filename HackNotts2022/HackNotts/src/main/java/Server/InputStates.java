@@ -1,9 +1,11 @@
-package Main;
+package Server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
 
 public class InputStates {
+    public static Semaphore available = new Semaphore(1, true);
+
     private static HashMap<Integer, InputState> inputs = new HashMap<Integer, InputState>();
 
     public static void AddState(int playerNo, InputState state) {

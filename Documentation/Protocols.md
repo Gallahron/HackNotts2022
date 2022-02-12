@@ -93,6 +93,8 @@ AT - Actor Type
 
 AN - Actor Number
 
+AX - Actor State
+
 ### Actor Types
 0 - Player
 
@@ -100,14 +102,21 @@ AN - Actor Number
 
 Actor Number corresponds to player numbers
 
+### Actor States
+
+0 - Alive
+
+1 - Dead
+
 ### Example
 
-DATA-ASAT0/AN1/PX100/PY100/SX1/SY0/AEASAT1/AN0/PX50/PY10/SX0/SY10/AE-END
+DATA-ASAT0/AN1/AX0/PX100/PY100/SX1/SY0/AEASAT1/AN0/AX1/PX50/PY10/SX0/SY10/AE-END
 
 |              | X   | Y   | Other  |
 |--------------|-----|-----|--------|
 | Actor Type   |     |     | Player |
 | Actor Number |     |     | 1 |
+| Actor State |     |     | Alive |
 | Position     | 100 | 100 |        |
 | Speed        | 1   | 0   |        |
 
@@ -115,5 +124,6 @@ DATA-ASAT0/AN1/PX100/PY100/SX1/SY0/AEASAT1/AN0/PX50/PY10/SX0/SY10/AE-END
 |--------------|----|----|--------|
 | Actor Type   |    |    | Bullet |
 | Actor Number |    |    | 0      |
+| Actor State |     |     | Dead |
 | Position     | 50 | 10 |        |
 | Speed        | 0  | 10 |        |

@@ -1,10 +1,10 @@
-package Main;
+package Server;
+
+import Main.Main;
 
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 public class Server {
     int portNo = 6969;
@@ -73,7 +73,7 @@ public class Server {
         for (char i : data.toCharArray()) {
             switch (i) {
                 case ('/'):
-                    int playerNo = Main.AddPlayer(Integer.parseInt(builder.toString()));
+                    int playerNo = PlayerManager.AddPlayer(Integer.parseInt(builder.toString()));
                     System.out.println("MachineID: " + builder);
 
                     InputStates.AddState(playerNo);
@@ -89,6 +89,9 @@ public class Server {
             if (builder.toString().equals("ID")) {
                 builder = new StringBuilder();
             }
+            if (builder.toString().equals("END")) {
+                return;
+            }
 
         }
     }
@@ -97,8 +100,11 @@ public class Server {
         StringBuilder builder = new StringBuilder();
         int playerNo = 0;
         String element = "";
+
+        InputState state = new InputState();
+
         for (char i : data.toCharArray()) {
-            if ((int)i > 47 && (int)i < 58 && element.isEmpty()) {
+            if ((int) i > 47 && (int) i < 58 && element.isEmpty()) {
                 element = builder.toString();
                 builder = new StringBuilder();
                 builder.append(i);
@@ -107,10 +113,10 @@ public class Server {
                     case ('/'):
                         int value = Integer.parseInt(builder.toString());
                         if (element.equals("ID")) {
-                            playerNo = Main.playerLookup.get(value);
+                            playerNo = PlayerManager.playerLookup.get(value);
                             value = playerNo;
                         }
-                        InputStates.ModifyState(playerNo, element, value);
+                        state.UpdateState(element, value);
                         builder = new StringBuilder();
                         element = "";
                         break;
@@ -121,7 +127,15 @@ public class Server {
                         builder.append(i);
                 }
             }
+            if (builder.toString().equals("END")) {
+                return;
+            }
         }
-        System.out.print(InputStates.GetState(playerNo).ToString());
+        try {
+            InputStates.available.acquire();
+            InputStates.AddState(playerNo, state);
+            System.out.print(InputStates.GetState(playerNo).ToString());
+            InputStates.available.release();
+        } catch (InterruptedException e){}
     }
 }

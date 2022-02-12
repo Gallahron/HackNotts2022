@@ -15,18 +15,7 @@ public class Main {
     public static int currPlayer = 1;
 
     public static void main(String args[]){
-        try {
-            URL whatismyip = new URL("http://checkip.amazonaws.com");
-
-            BufferedReader in = null;
-            in = new BufferedReader(new InputStreamReader(
-                    whatismyip.openStream()));
-
-            String ip = in.readLine(); //you get the IP as a String
-            System.out.println(ip);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        for (String i : GetIP.getLocalHostAddresses()) System.out.println(i);
 
         server = new Server(6969);
         server.OpenServer();

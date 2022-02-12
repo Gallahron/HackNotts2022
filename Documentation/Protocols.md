@@ -20,20 +20,20 @@ Connection from machine 843128610
 ## Connection Response
 
 ### Header:
-ACC-
+ACCP-
 
 ### Definitions
 PN - Player Number (Integer)
 
 ### Example
-ACC-PN1-END
+ACCP-PN1-END
 
 Accepted connection. You are player 1.
 
 ## Sending
 
 ### Header: 
-INPUT-
+INPT-
 
 <br>
 
@@ -57,7 +57,7 @@ All are boolean values.
 
 ### Example
 
-INPUT-ID843128610L0R1J0S1E1-END
+INPT-ID843128610L0R1J0S1E1-END
 
 User input from machine 843128610
 Shows that the user isn't pressing: Left or Jump but is pressing Right and Shoot. And that the user is ready.

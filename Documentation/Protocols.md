@@ -1,14 +1,47 @@
 # Protocols
 
+## Footers
+All requests end with -END
+
+
+## Connection
+
+### Header: 
+CONN-
+
+### Definitions
+ID - Machine ID (Integer)
+
+### Example:
+CONN-ID843128610-END
+
+Connection from machine 843128610
+
+## Connection Response
+
+### Header:
+ACC-
+
+### Definitions
+PN - Player Number (Integer)
+
+### Example
+ACC-PN1-END
+
+Accepted connection. You are player 1.
+
 ## Sending
 
 ### Header: 
 INPUT-
 
-### FOOTER
--END
+<br>
+
+ID - Machine ID (Integer)
+
 
 ### Definitions:
+
 L - LEFT
 
 R - RIGHT
@@ -21,10 +54,12 @@ E - READY
 
 All are boolean values.
 
+
 ### Example
 
-INPUT-L0R1J0S1E1-END
+INPUT-ID843128610L0R1J0S1E1-END
 
+User input from machine 843128610
 Shows that the user isn't pressing: Left or Jump but is pressing Right and Shoot. And that the user is ready.
 
 ## Recieving
@@ -34,17 +69,15 @@ There can be any number of actors.
 ### Header:
 DATA-
 
-### Footer:
--END
 
 ### Definitions
-PX - X position
+PX - X position (float)
 
-PY - Y position
+PY - Y position (float)
 
-SX - X speed
+SX - X speed (float)
 
-SY - Y speed
+SY - Y speed (float)
 
 <br>
 

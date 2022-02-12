@@ -66,4 +66,9 @@ public class Entity {
     public void setEntityNumber(int entityNumber) {
         this.entityNumber = entityNumber;
     }
+
+    public void move(float time) {
+        this.xPos += xSpeed * time;
+        this.yPos += ySpeed * time;
+    }
 }

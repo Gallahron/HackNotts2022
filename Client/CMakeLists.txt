@@ -12,7 +12,7 @@ find_package(PkgConfig REQUIRED)
 find_package(Threads)
 
 # get modules with pkg-config
-pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_ttf SDL2_image)
+pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_ttf SDL2_image SDL2_net)
 
 # add source files
 add_executable(HN22-Client

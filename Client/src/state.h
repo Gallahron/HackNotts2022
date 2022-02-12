@@ -4,10 +4,19 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#define MAX_PLAYERS 8
+#define MAX_BULLETS 256
+
+typedef int Player;
+typedef int Bullet;
+
 struct State {
 	bool playing;
 	double pos_x;
 	double pos_y;
+	/* new state */
+	Player players[MAX_PLAYERS];
+	Bullet bullets[MAX_BULLETS];
 };
 
 struct StateManager {

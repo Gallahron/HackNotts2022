@@ -2,8 +2,10 @@
 #include <sysexits.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <arpa/inet.h>
 
 #include <SDL.h>
+#include <SDL_net.h>
 #include <SDL_events.h>
 #include <SDL_render.h>
 #include <SDL_video.h>
@@ -20,10 +22,10 @@ enum SDL_USEREVENTS {
 	TICK = 1,
 };
 
-int game(bool verbose);
+int game(struct in_addr server_addr, bool verbose);
 Uint32 tick_event(Uint32 interval, void *param);
 
-int game(bool verbose)
+int game(struct in_addr server_addr, bool verbose)
 {
 	int exit_code = EX_OK;
 	struct StateManager* state_mgr = NULL;
@@ -35,6 +37,7 @@ int game(bool verbose)
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Init(SDL_INIT_TIMER);
+	SDLNet_Init();
 
 	if (!(window = SDL_CreateWindow("My SDL2 Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_SHOWN))) {
 		exit_code = EX_SOFTWARE;
@@ -51,7 +54,7 @@ int game(bool verbose)
 		goto cleanup;
 	}
 
-	if (!(listener = listener_init(state_mgr))) {
+	if (!(listener = listener_init(state_mgr, server_addr))) {
 		exit_code = EX_SOFTWARE;
 		goto cleanup;
 	}

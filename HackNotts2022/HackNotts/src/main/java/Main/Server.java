@@ -43,6 +43,7 @@ public class Server {
                         break;
                     case ("INPT"):
                         ProcessInput(connectionString, request);
+                        break;
                     default:
                         ConnectionError(request);
                         break;

@@ -5,7 +5,7 @@ All numerical data should converted to a UTF-8 encoded string.
 Each Value should be terminated with a '_' character
 
 ## Footers
-All requests end with ]END
+All requests end with ']'
 
 
 ## Connection
@@ -17,7 +17,7 @@ CONN_
 ID - Machine ID (Integer)
 
 ### Example:
-CONN[ID843128610]END
+CONN[ID843128610]
 
 Connection from machine 843128610
 
@@ -30,7 +30,7 @@ ACCP[
 PN - Player Number (Integer)
 
 ### Example
-ACCP[PN1]END
+ACCP[PN1]
 
 Accepted connection. You are player 1.
 
@@ -61,7 +61,7 @@ All are boolean values.
 
 ### Example
 
-INPT[ID843128610_L0_R1_J0_S1_E1_]END
+INPT[ID843128610_L0_R1_J0_S1_E1_]
 
 User input from machine 843128610
 Shows that the user isn't pressing: Left or Jump but is pressing Right and Shoot. And that the user is ready.
@@ -112,7 +112,7 @@ Actor Number corresponds to player numbers
 
 ### Example
 
-DATA[A(AT0_AN1_AX0_PX100_PY100_SX1_SY0)A(AT1_AN0_AX1_PX50_PY10_SX0_SY10)]END
+DATA[A(AT0_AN1_AX0_PX100_PY100_SX1_SY0)A(AT1_AN0_AX1_PX50_PY10_SX0_SY10)]
 
 | Actor     | X   | Y   | Other  |
 |--------------|-----|-----|--------|

@@ -1,5 +1,9 @@
 # Protocols
 
+All numerical data should converted to a UTF-8 encoded string.
+
+Each Value should be terminated with a '/' character
+
 ## Footers
 All requests end with -END
 
@@ -13,7 +17,7 @@ CONN-
 ID - Machine ID (Integer)
 
 ### Example:
-CONN-ID843128610-END
+CONN-ID843128610/-END
 
 Connection from machine 843128610
 
@@ -26,7 +30,7 @@ ACCP-
 PN - Player Number (Integer)
 
 ### Example
-ACCP-PN1-END
+ACCP-PN1/-END
 
 Accepted connection. You are player 1.
 
@@ -57,7 +61,7 @@ All are boolean values.
 
 ### Example
 
-INPT-ID843128610L0R1J0S1E1-END
+INPT-ID843128610/L0/R1/J0/S1/E1/-END
 
 User input from machine 843128610
 Shows that the user isn't pressing: Left or Jump but is pressing Right and Shoot. And that the user is ready.
@@ -98,7 +102,7 @@ Actor Number corresponds to player numbers
 
 ### Example
 
-DATA-ASAT0AN1PX100PY100SX1SY0AEASAT1AN0PX50PY10SX0SY10AE-END
+DATA-ASAT0/AN1/PX100/PY100/SX1/SY0/AEASAT1/AN0/PX50/PY10/SX0/SY10/AE-END
 
 |              | X   | Y   | Other  |
 |--------------|-----|-----|--------|

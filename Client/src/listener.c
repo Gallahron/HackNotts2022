@@ -9,13 +9,15 @@
 
 #include <SDL_net.h>
 
+#include "log.h"
 #include "state.h"
+#include "parse.h"
 
 #include "listener.h"
 
 #define PORT 6969
-#define BUFFER_SIZE 8192
-#define PACKET_SIZE 508
+#define PACKET_SIZE 8192
+#define INPUT_SEND_FREQ 60
 
 struct ListenerState* listener_init(struct StateManager* state_mgr, struct in_addr server_addr);
 void listener_destroy(struct ListenerState* listener);
@@ -71,11 +73,10 @@ void listener_destroy(struct ListenerState* listener)
 void* listener(void* listener_args)
 {
 	struct ListenerArgs args = *(struct ListenerArgs*) listener_args;
-	struct State* state;
 	unsigned int machine_id = randrange(1, 8192);
 
 	srand(time(NULL));
-	fprintf(stderr, "Server IP address: %s\n", inet_ntoa(*args.server_addr));
+	print_info("Server IP address: %s", inet_ntoa(*args.server_addr));
 
 	UDPsocket socket = NULL;
 	IPaddress* address_self = NULL;
@@ -85,26 +86,26 @@ void* listener(void* listener_args)
 
 	/* open UDP socket */
 	if (!(socket = SDLNet_UDP_Open(0))) {
-		fprintf(stderr, "Error: could not open sending socket\n");
+		print_err("Could not open sending socket");
 		goto listener_cleanup;
 	}
 
 	/* add socket to socket set */
 	SDLNet_SocketSet socket_set = SDLNet_AllocSocketSet(1);
 	if (SDLNet_UDP_AddSocket(socket_set, socket) < 0) {
-		fprintf(stderr, "Error: could not add socket to socket set\n");
+		print_err("Could not add socket to socket set");
 		goto listener_cleanup;
 	}
 	
 	/* allocate sending packet */
 	if (!(packet_sending = SDLNet_AllocPacket(PACKET_SIZE))) {
-		fprintf(stderr, "Error: could not allocate sending packet (%d bytes)\n", PACKET_SIZE);
+		print_err("Could not allocate sending packet (%d bytes)", PACKET_SIZE);
 		goto listener_cleanup;
 	}
 
 	/* allocate receiving packet */
 	if (!(packet_receiving = SDLNet_AllocPacket(PACKET_SIZE))) {
-		fprintf(stderr, "Error: could not allocate receiving packet (%d bytes)\n", PACKET_SIZE);
+		print_err("Could could not allocate receiving packet (%d bytes)", PACKET_SIZE);
 		goto listener_cleanup;
 	}
 
@@ -118,18 +119,46 @@ void* listener(void* listener_args)
 	packet_sending->address = address_server;
 	SDLNet_UDP_Send(socket, -1, packet_sending);
 
-	/* parse initial message response */
+	/* parse initial message response (UGLY) */
 	SDLNet_CheckSockets(socket_set, ~0);
 	SDLNet_UDP_Recv(socket, packet_receiving);
-	printf("got: %s\n", packet_receiving->data);
+	char* data_ptr = (char* ) packet_receiving->data;
+	const char* accp_str = "ACCP[PN";
+	size_t accp_str_len = strlen(accp_str);
+	if (strncmp(data_ptr, accp_str, accp_str_len) != 0) {
+		print_err("Did not receive correct response (ACCP[PN___])");
+		goto listener_cleanup;
+	}
+	int player_number = (int) strtol(data_ptr + accp_str_len, &data_ptr, 10);
+	if (player_number <= 0) {
+		print_err("Did not receive correct response, player number invalid (ACCP[PN___])");
+		goto listener_cleanup;
+	}
+	if (strncmp(data_ptr, "]", 1) != 0) {
+		print_err("Did not receive correct response (ACCP[PN___])");
+		goto listener_cleanup;
+	}
 
-	printf("entering loop...\n");
 	while (true) {
-		SDLNet_CheckSockets(socket_set, ~0);
+		SDLNet_CheckSockets(socket_set, (int) ((1.0 / INPUT_SEND_FREQ) * 1000.0));
+
 		if (SDLNet_SocketReady(socket)) {
 			if (SDLNet_UDP_Recv(socket, packet_receiving)) {
-				printf("received: %s\n", packet_receiving->data);
+				struct State* state = args.state_mgr->back;
+
+				parse_msg(state, (char* ) packet_receiving->data, packet_receiving->len);
+
+				/* swap states */
+				pthread_mutex_lock(&args.state_mgr->mutex);
+				state = args.state_mgr->back;
+				args.state_mgr->back = args.state_mgr->front;
+				args.state_mgr->front = state;
+				pthread_mutex_unlock(&args.state_mgr->mutex);
 			}
+		}
+
+		if (0/*INPUTS TO SEND*/) {
+			// send inputs
 		}
 	}
 
@@ -139,58 +168,6 @@ listener_cleanup:
 		SDLNet_UDP_Close(socket);
 
 	return NULL;
-
-// 	IPaddress server_addr = { args.server_addr->s_addr, PORT };
-// 	socket_channel = SDLNet_UDP_Bind(socket, -1, &server_addr);
-
-// 	UDPpacket* packet;
-// 	packet = SDLNet_AllocPacket(1024);
-// 	packet->len = snprintf((char* ) packet->data, packet->maxlen, "CONN[ID%d]", machine_id) + 1;
-// 	packet->channel = socket_channel;
-// 	packet->address = server_addr;
-
-// 	fprintf(stderr, "UDPSend: %d\n", SDLNet_UDP_Send(socket, socket_channel, packet));
-
-// 	SDLNet_FreePacket(packet);
-
-// listener_cleanup:
-// 	if (socket_channel != -1)
-// 		SDLNet_UDP_Unbind(socket, socket_channel);
-
-// 	if (socket)
-// 		SDLNet_UDP_Close(socket);
-
-// 	return NULL;
-
-	// /* establish connection */
-	// int sockfd;
-	// char buffer[BUFFER_SIZE];
-	// struct sockaddr_in server_addr;
-
-	// /* create socket file descriptor */
-	// if ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-	// 	printf("socket creation failed");
-	// 	exit(EXIT_FAILURE);
-	// }
-
-	// memset(&server_addr, 0, sizeof(server_addr));
-	// server_addr.sin_family = AF_INET;
-	// server_addr.sin_port = htons(PORT);
-	// server_addr.sin_addr.s_addr = args.server_addr->s_addr;
-	
-	// int conn_length = snprintf(buffer, BUFFER_SIZE, "CONN[ID%d]", machine_id);
-	// if (conn_length < 0 || conn_length >= BUFFER_SIZE)
-	// 	return NULL;
-
-	// sendto(sockfd, buffer, conn_length, MSG_CONFIRM, (const struct sockaddr *) &server_addr, sizeof(server_addr));
-
-	// int receive_count;
-	// uint32_t len = sizeof(server_addr);
-	// receive_count = recvfrom(sockfd, (char *)buffer, BUFFER_SIZE, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
-	// buffer[receive_count] = '\0';
-	// printf("Response: %s\n", buffer);
-
-	// close(sockfd);
 
 	/////// plan:
 	// init SDL_net

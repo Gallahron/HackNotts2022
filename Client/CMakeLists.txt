@@ -17,10 +17,12 @@ pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_ttf SDL2_image SDL2_ne
 # add source files
 add_executable(HN22-Client
 	"${PROJECT_SOURCE_DIR}/src/main.c"
+	"${PROJECT_SOURCE_DIR}/src/log.c"
 	"${PROJECT_SOURCE_DIR}/src/game.c"
 	"${PROJECT_SOURCE_DIR}/src/state.c"
 	"${PROJECT_SOURCE_DIR}/src/render.c"
 	"${PROJECT_SOURCE_DIR}/src/listener.c"
+	"${PROJECT_SOURCE_DIR}/src/parse.c"
 )
 
 # link libraries

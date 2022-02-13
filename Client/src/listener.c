@@ -112,7 +112,7 @@ void* listener(void* listener_args)
 	SDLNet_ResolveHost(&address_server, inet_ntoa(*args.server_addr), PORT);
 
 	/* sending initial protocol message */
-	int data_len = snprintf((char* ) packet_sending->data, packet_sending->maxlen, "CONN[ID%d]", machine_id);
+	int data_len = snprintf((char* ) packet_sending->data, packet_sending->maxlen, "CONN(ID%d)", machine_id);
 	if (data_len < 0 || data_len >= PACKET_SIZE)
 		return NULL;
 	packet_sending->len = data_len + 1;
@@ -122,22 +122,12 @@ void* listener(void* listener_args)
 	/* parse initial message response (UGLY) */
 	SDLNet_CheckSockets(socket_set, ~0);
 	SDLNet_UDP_Recv(socket, packet_receiving);
-	char* data_ptr = (char* ) packet_receiving->data;
-	const char* accp_str = "ACCP[PN";
-	size_t accp_str_len = strlen(accp_str);
-	if (strncmp(data_ptr, accp_str, accp_str_len) != 0) {
-		print_err("Did not receive correct response (ACCP[PN___])");
+	int player_number = parse_conn(args.state_mgr->back, (char*) packet_receiving->data, packet_receiving->len);
+
+	if (player_number <= 0)
 		goto listener_cleanup;
-	}
-	int player_number = (int) strtol(data_ptr + accp_str_len, &data_ptr, 10);
-	if (player_number <= 0) {
-		print_err("Did not receive correct response, player number invalid (ACCP[PN___])");
-		goto listener_cleanup;
-	}
-	if (strncmp(data_ptr, "]", 1) != 0) {
-		print_err("Did not receive correct response (ACCP[PN___])");
-		goto listener_cleanup;
-	}
+
+	args.state_mgr->back->player_number_self = player_number;
 
 	while (true) {
 		SDLNet_CheckSockets(socket_set, (int) ((1.0 / INPUT_SEND_FREQ) * 1000.0));
@@ -168,35 +158,6 @@ listener_cleanup:
 		SDLNet_UDP_Close(socket);
 
 	return NULL;
-
-	/////// plan:
-	// init SDL_net
-	// create connection
-	// establish protocol connection
-	// get response / player number
-	// enter loop listening for state, after parsing send any inputs for state
-
-	// while (true) {
-	// 	usleep(16 * 1000);
-
-	// 	/* update back state (TODO: get from server) */
-
-	// 	state = args.state_mgr->back;
-
-	// 	state->pos_x = state->pos_x + 0.25;
-	// 	if (state->pos_x > 20.0)
-	// 		state->pos_x = 0 - 1 + (20.0 - state->pos_x);
-
-	// 	/* swap states */
-
-	// 	pthread_mutex_lock(&args.state_mgr->mutex);
-
-	// 	state = args.state_mgr->back;
-	// 	args.state_mgr->back = args.state_mgr->front;
-	// 	args.state_mgr->front = state;
-
-	// 	pthread_mutex_unlock(&args.state_mgr->mutex);
-	// }
 }
 
 int randrange(int min, int max)

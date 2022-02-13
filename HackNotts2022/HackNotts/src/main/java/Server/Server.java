@@ -76,7 +76,7 @@ public class Server {
 
         for (char i : data.toCharArray()) {
             switch (i) {
-                case (']'):
+                case (')'):
                     int playerNo = 0;
                     try {
                         playerNo = PlayerManager.AddPlayer(Integer.parseInt(builder.toString()), request.getAddress(), request.getPort());
@@ -87,9 +87,9 @@ public class Server {
                     System.out.println("MachineID: " + builder);
 
                     InputStates.AddState(playerNo);
-                    SendMessage("ACCP[PN" + playerNo + "]", request);
+                    SendMessage("ACCP(PN" + playerNo + ")", request);
                     return;
-                case ('['):
+                case ('('):
                     builder = new StringBuilder();
                     break;
                 default:
@@ -117,7 +117,7 @@ public class Server {
                 builder.append(i);
             } else {
                 switch (i) {
-                    case (']'):
+                    case (')'):
                     case ('_'):
                         int value = Integer.parseInt(builder.toString());
                         if (element.equals("ID")) {
@@ -133,9 +133,9 @@ public class Server {
                         builder = new StringBuilder();
                         element = "";
 
-                        if (i == ']') break loop;
+                        if (i == ')') break loop;
                         break;
-                    case ('['):
+                    case ('('):
                         builder = new StringBuilder();
                         break;
                     default:

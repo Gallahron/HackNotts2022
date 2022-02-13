@@ -7,7 +7,21 @@
 
 #include "render.h"
 
-#define BLOCK_SIZE 32
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+#define GAME_WIDTH 20.0
+#define GAME_HEIGHT 15.0
+#define BLOCK_SIZE SCREEN_WIDTH / GAME_WIDTH
+
+#define PLAYER_RATIO_X 1.0
+#define PLAYER_RATIO_Y 1.5
+#define PLAYER_WIDTH (int) (PLAYER_RATIO_X * (double) BLOCK_SIZE)
+#define PLAYER_HEIGHT (int) (PLAYER_RATIO_Y * (double) BLOCK_SIZE)
+
+#define BULLET_RATIO_X 0.25
+#define BULLET_RATIO_Y 0.25
+#define BULLET_WIDTH (int) (BULLET_RATIO_X * (double) BLOCK_SIZE)
+#define BULLET_HEIGHT (int) (BULLET_RATIO_Y * (double) BLOCK_SIZE)
 
 void render(struct State* state, SDL_Renderer* renderer);
 
@@ -40,7 +54,33 @@ void render(struct State* state, SDL_Renderer* renderer)
 		}
 	}
 
+	SDL_SetRenderDrawColor(renderer, 0xDD, 0x44, 0x00, 0xFF);
+	for (int i = 0; i < (int) state->player_count; i++) {
+		struct Player* player = &state->players[i];
 
+		rect = (SDL_Rect) {
+			.x = (player->entity.pos_x / GAME_WIDTH) * SCREEN_WIDTH,
+			.y = (((GAME_HEIGHT - player->entity.pos_y) / GAME_HEIGHT) * SCREEN_HEIGHT) - PLAYER_HEIGHT,
+			.w = PLAYER_WIDTH,
+			.h = PLAYER_HEIGHT,
+		};
+
+		SDL_RenderFillRect(renderer, &rect);
+	}
+
+	SDL_SetRenderDrawColor(renderer, 0x25, 0x25, 0x25, 0xFF);
+	for (int i = 0; i < (int) state->bullet_count; i++) {
+		struct Bullet* bullet = &state->bullets[i];
+
+		rect = (SDL_Rect) {
+			.x = (bullet->entity.pos_x / GAME_WIDTH) * SCREEN_WIDTH,
+			.y = (((GAME_HEIGHT - bullet->entity.pos_y) / GAME_HEIGHT) * SCREEN_HEIGHT) - BULLET_HEIGHT,
+			.w = BULLET_WIDTH,
+			.h = BULLET_HEIGHT,
+		};
+
+		SDL_RenderFillRect(renderer, &rect);
+	}
 
 	SDL_RenderPresent(renderer);
 }

@@ -6,6 +6,7 @@
 
 #include "state.h"
 
+int parse_conn(struct State* state, char* msg, size_t msg_len);
 bool parse_msg(struct State* state, const char* msg, size_t msg_len);
 
 #endif

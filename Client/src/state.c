@@ -63,11 +63,7 @@ struct State* state_init()
 
 	if (!state)
 		return NULL;
-
-	state->playing = true;
-	state->pos_x = 0.0;
-	state->pos_y = 8.0;
-
+		
 	state->map_data = map_init(MP_STANDARD);
 
 	return state;

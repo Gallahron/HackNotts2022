@@ -97,7 +97,7 @@ public class GameController {
     }
 
     void outputData() {
-        String message = "DATA[";
+        String message = "DATA(";
         for (Entity entity : entities) {
             message += String.format("A(AT%d_AN%d_PX%f_PY%f_SX%f_SY%f)",
                     entity.getEntityType(),
@@ -108,7 +108,7 @@ public class GameController {
                     entity.getYSpeed()
             );
         }
-        message += "]";
+        message += ")";
 
         System.out.println(message);
         for (NetworkPlayer i : PlayerManager.playerLookup.values()) {

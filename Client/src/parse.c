@@ -9,26 +9,63 @@
 
 #include "parse.h"
 
-int isNumeric(char c) {
-	if (c == 45 || (c > 47 && c < 58)) return true;
-	return false;
-}
-
+int parse_conn(struct State* state, char* msg, size_t msg_len);
 bool parse_msg(struct State* state, const char* msg, size_t msg_len);
+bool is_numeric(char c);
+
+int parse_conn(struct State* state, char* msg, size_t msg_len)
+{
+	const char* accp_str = "ACCP(PN";
+	size_t accp_str_len = strlen(accp_str);
+	int player_number;
+
+	if (strncmp(msg, accp_str, accp_str_len) != 0) {
+		print_err("Did not receive correct response (ACCP(PN___))");
+		return 0;
+	}
+
+	if ((player_number = strtol(msg + accp_str_len, &msg, 10)) <= 0) {
+		print_err("Did not receive correct response, player number invalid (ACCP(PN___))");
+		return 0;
+	}
+
+	if (strncmp(msg, ")", 1) != 0) {
+		print_err("Did not receive correct response (ACCP(PN___))");
+		return 0;
+	}
+
+	return player_number;
+}
 
 bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 {
 	state->bullet_count = 0;
 	state->player_count = 0;
 
-	char* header = malloc(sizeof(char) * 5);
-	memcpy(header, msg, 5);
+	/*
+	DATA(A(AT1_AN0_PX5767.653320_PY0.000000_SX32.000000_SY0.000000)A(AT0_AN1_PX0.000000_PY5574.660156_SX0.000000_SY32.000000))
 
-	char* c = msg;
+	msg_type = get_msg_type(msg)
+
+	if (msg_type == DATA) {
+		
+
+	    return true;
+	} else {
+		return false;
+    }
+
+
+	*/
+
+	return true;
 
 	
 
-	while (*c != ']') { 
+
+	const char* c = msg;
+
+	while (*c != ')') { 
 		//Move to char after (
 		while (*(++c) != '(');
 		c++;
@@ -45,7 +82,7 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 			char* value_ptr = value;
 			int index = 0;
 			
-			while (!isNumeric(*c) && index < 3) {
+			while (!is_numeric(*c) && index < 3) {
 				type_ptr[index] = *c;
 				c++;
 				index++;
@@ -67,15 +104,15 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 			if (*c == '_') c++;
 
 			switch (type[0]) {
-				case ('A'):
+				case 'A':
 					switch(type[1]) {
-						case ('T'):
+						case 'T':
 							entity_type = atoi(value);
 							break;
-						case ('N'):
+						case 'N':
 							entity_number = atoi(value);
 							break;
-						case ('X'):
+						case 'X':
 							entity_state = atoi(value);
 							break;
 						default:
@@ -83,12 +120,12 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 							return false;
 					}
 					break;
-				case ('P'):
+				case 'P':
 					switch(type[1]) {
-						case ('X'):
+						case 'X':
 							entity->pos_x = atof(value);
 							break;
-						case ('Y'):
+						case 'Y':
 							entity->pos_y = atof(value);
 							break;
 						default:
@@ -96,12 +133,12 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 							return false;
 					}
 					break;
-				case ('S'):
+				case 'S':
 					switch(type[1]) {
-						case('X'):
+						case 'X':
 							entity->speed_x = atof(value);
 							break;
-						case('Y'):
+						case 'Y':
 							entity->speed_y = atof(value);
 							break;
 						default:
@@ -117,7 +154,7 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 		}
 
 		switch (entity_type) {
-			case (1):;
+			case 1: {
 				struct Bullet* bullet = malloc(sizeof(struct Bullet));
 				bullet->entity = *entity;
 				switch (entity_number) {
@@ -132,23 +169,26 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 				state->bullets[state->bullet_count] = *bullet;
 				state->bullet_count++;
 				break;
-			case (0):;
-				struct Player* player = malloc(sizeof(struct Player));
+			}
+			case 0: {
+				struct Player* player = malloc(sizeof(*player));
 				player->entity = *entity;
+				free(entity);
 				player->player_number = entity_number;
 				player->lives = entity_state;
 
 				state->players[state->player_count] = *player;
 				state->player_count++;
 				break;
+			}
 		}
 		c++;
 	}
 
-	for (int i = 0; i < state->bullet_count; i++) {
-		fprintf(stderr, "BULLET %u - X: %f, Y: %f\n", state->players[i].player_number, state->players[i].entity.pos_x, state->players[i].entity.pos_y);
+	for (int i = 0; i < (int) state->bullet_count; i++) {
+		fprintf(stderr, "BULLET %u - X: %f, Y: %f\n", state->bullets[i].type, state->bullets[i].entity.pos_x, state->bullets[i].entity.pos_y);
 	}
-	for (int i = 0; i < state->player_count; i++) {
+	for (int i = 0; i < (int) state->player_count; i++) {
 		fprintf(stderr, "PLAYER %u - X: %f, Y: %f\n", state->players[i].player_number, state->players[i].entity.pos_x, state->players[i].entity.pos_y);
 	}
 
@@ -157,4 +197,9 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 	//print_info("Msg: %.*s",msg_len, msg);
 
 	return true;
+}
+
+bool is_numeric(char c)
+{
+	return c == '-' || (c >= '0' && c <= '9');
 }

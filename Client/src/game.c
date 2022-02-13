@@ -112,17 +112,17 @@ int game(struct in_addr server_addr, bool verbose)
 	}
 
 cleanup:
-	if (textures)
-		tex_destroy(textures);
-
 	if (timer_tick != 0)
 		SDL_RemoveTimer(timer_tick);
 
-	if (window)
-		SDL_DestroyWindow(window);
-
 	if (renderer)
 		SDL_DestroyRenderer(renderer);
+
+	if (textures)
+		tex_destroy(textures);
+
+	if (window)
+		SDL_DestroyWindow(window);
 
 	if (listener)
 		listener_destroy(listener);

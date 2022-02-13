@@ -19,5 +19,6 @@ struct Textures {
 struct Textures* tex_init(SDL_Renderer* renderer);
 void tex_destroy(struct Textures* textures);
 void render(struct State* state, struct Textures* textures, SDL_Renderer* renderer);
+void loadFont();void loadFont();
 
 #endif

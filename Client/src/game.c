@@ -72,6 +72,8 @@ int game(struct in_addr server_addr, bool verbose)
 		goto cleanup;
 	}
 
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
 	SDL_SetWindowMinimumSize(window, 640, 480);
 	SDL_SetWindowMaximumSize(window, 640, 480);
 

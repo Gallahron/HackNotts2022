@@ -101,13 +101,13 @@ void render(struct State* state, struct Textures* textures, SDL_Renderer* render
 
 			if (block == BK_PLATFORM) {
 				rect = (SDL_Rect) {
-					.x = (x * BLOCK_SIZE) + 8,
-					.y = (((MAP_SIZE_Y - y) - 1) * BLOCK_SIZE) + 12,
+					.x = (x * BLOCK_SIZE) + 12,
+					.y = (((MAP_SIZE_Y - y) - 1) * BLOCK_SIZE) + 8,
 					.w = BLOCK_SIZE,
 					.h = BLOCK_SIZE,
 				};
 
-				SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x20, 20);
+				SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x20, 125);
 				SDL_RenderFillRect(renderer, &rect);
 			}
 

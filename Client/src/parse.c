@@ -44,30 +44,33 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 
 	/*
 	DATA(A(AT1_AN0_PX5767.653320_PY0.000000_SX32.000000_SY0.000000)A(AT0_AN1_PX0.000000_PY5574.660156_SX0.000000_SY32.000000))
-
-	msg_type = get_msg_type(msg)
-
-	if (msg_type == DATA) {
-		
-
-	    return true;
-	} else {
-		return false;
-    }
-
-
 	*/
 
-	//return true;
+	// const char msg_type_data_str[] = "DATA(";
+	// if (strncmp(msg, msg_type_data_str, sizeof(msg_type_data_str)) != 0)
+	// 	return false;
 
-	
+	// msg += sizeof(msg_type_data_str) - 1;
 
+	// const char msg_subtype_actor_str[] = "A(";
+	// const char msg_subtype_finished_str[] = "F(";
+	// if (strncmp(msg, msg_subtype_actor_str, sizeof(msg_subtype_actor_str)) == 0) {
+	// 	actor = parse_actor(msg, &msg);
+	// } else if (strncmp(msg, msg_subtype_finished_str, sizeof(msg_subtype_finished_str)) == 0) {
+	// 	finished = parse_finished(msg, &msg);
+	// } else {
+	// 	return false;
+	// }
+
+	// return true;
 
 	const char* c = msg;
 
 	while (*c != ')') { 
 		//Move to char after (
 		while (*(++c) != '(');
+		c++;
+		c++;
 		c++;
 
 		struct Entity* entity = malloc(sizeof(struct Entity));

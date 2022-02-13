@@ -132,6 +132,12 @@ void* listener(void* listener_args)
 
 	args.state_mgr->back->player_number_self = player_number;
 
+	struct InputManager* input_mgr = args.input_mgr;
+
+	pthread_mutex_lock(&input_mgr->mutex);
+	struct Inputs inputs_prev = input_mgr->inputs;
+	pthread_mutex_unlock(&input_mgr->mutex);
+
 	while (true) {
 		SDLNet_CheckSockets(socket_set, (int) ((1.0 / INPUT_SEND_FREQ) * 1000.0));
 
@@ -151,17 +157,21 @@ void* listener(void* listener_args)
 			}
 		}
 
-		struct InputManager* input_mgr = args.input_mgr;
 		pthread_mutex_lock(&input_mgr->mutex);
-		bool i_l = input_mgr->left, i_r = input_mgr->right, i_j = input_mgr->jump, i_s = input_mgr->shoot;
+		struct Inputs inputs_curr = input_mgr->inputs;
 		pthread_mutex_unlock(&input_mgr->mutex);
 
-		int data_len = snprintf((char* ) packet_sending->data, packet_sending->maxlen, "INPT(ID%d_L%d_R%d_J%d_S%d)", machine_id, i_l, i_r, i_j, i_s);
+		if (inputs_compare(&inputs_prev, &inputs_curr))
+			continue;
+
+		int data_len = snprintf((char* ) packet_sending->data, packet_sending->maxlen, "INPT(ID%d_L%d_R%d_J%d_S%d)", machine_id, inputs_curr.left, inputs_curr.right, inputs_curr.jump, inputs_curr.shoot);
 		if (data_len < 0 || data_len >= PACKET_SIZE)
 			return NULL;
 		packet_sending->len = data_len + 1;
 		packet_sending->address = address_server;
 		SDLNet_UDP_Send(socket, -1, packet_sending);
+
+		inputs_prev = inputs_curr;
 	}
 
 listener_cleanup:

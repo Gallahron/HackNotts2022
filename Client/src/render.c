@@ -107,6 +107,16 @@ void render(struct State* state, struct Textures* textures, SDL_Renderer* render
 
 	cloud_offset++;
 
+	rect = (SDL_Rect) {
+		.x = (-1 * BLOCK_SIZE) + 12,
+		.y = (((MAP_SIZE_Y - 12) - 1) * BLOCK_SIZE) + 8,
+		.w = BLOCK_SIZE,
+		.h = BLOCK_SIZE,
+	};
+
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x20, 125);
+	SDL_RenderFillRect(renderer, &rect);
+
 	struct MapData* map_data = state->map_data;
 	for (int y = MAP_SIZE_Y - 1; y >= 0; y--) {
 		for (int x = 0; x < MAP_SIZE_X; x++) {
@@ -128,7 +138,6 @@ void render(struct State* state, struct Textures* textures, SDL_Renderer* render
 					.h = BLOCK_SIZE,
 				};
 
-				SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x20, 125);
 				SDL_RenderFillRect(renderer, &rect);
 			}
 

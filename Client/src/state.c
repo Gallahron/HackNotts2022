@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include "map.h"
+
 #include "state.h"
 
 struct StateManager* state_mgr_init();
@@ -66,11 +68,16 @@ struct State* state_init()
 	state->pos_x = 0.0;
 	state->pos_y = 8.0;
 
+	state->map_data = map_init(MP_STANDARD);
+
 	return state;
 }
 
 void state_destroy(struct State* state)
 {
+	if (state)
+		map_destroy(state->map_data);
+
 	if (state)
 		free(state);
 }

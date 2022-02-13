@@ -33,14 +33,11 @@ struct Bullet {
 };
 
 struct State {
-	bool playing;
-	double pos_x;
-	double pos_y;
-	/* new state */
 	struct MapData* map_data;
 	struct Player players[MAX_PLAYERS];
 	struct Bullet bullets[MAX_BULLETS];
 	size_t player_count, bullet_count;
+	int player_number_self;
 };
 
 struct StateManager {

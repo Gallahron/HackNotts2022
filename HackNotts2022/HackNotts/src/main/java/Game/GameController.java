@@ -18,14 +18,14 @@ public class GameController {
     Server server;
     Arena map;
 
-    float gravity = -4;
+    float gravity = -15;
 
     float deltaTime;
     long oldTime;
 
     public GameController(Server server) {
         this.server = server;
-        //entities.add(new Bullet(0.04f,2,1,1));
+        //entities.add(new Bullet(0.04f,7,3,0, entities));
         map = new Arena();
         updateTime();
     }
@@ -42,7 +42,7 @@ public class GameController {
                 outputData();
                 //draw();
 
-                TimeUnit.MILLISECONDS.sleep(10);
+                TimeUnit.MILLISECONDS.sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -61,13 +61,31 @@ public class GameController {
             InputStates.available.acquire();
             for (int i = 1; i < PlayerManager.currPlayer; i++) {
                 if (i > players.size()) {
-                    Player player = new Player(i, 2, 2f, 0, 0);
+                    Player player = new Player(i, 2 + 3 * (i-1), 2f, 3, 0);
                     players.add(player);
                     entities.add(player);
                 }
                 InputState state = InputStates.GetState(i);
                 Player player = players.get(i-1);
-                //player.setXSpeed(player.MAX_SPEED * (state.GetState("R") - state.GetState("L")));
+                float speed = player.MAX_SPEED * (state.GetState("R") - state.GetState("L"));
+                player.setXSpeed(speed);
+                player.facing = speed != 0 ? (int)(speed / Math.abs(speed)) : player.facing;
+
+                if (state.GetState("J") == 1 && !state.jumpToggle) {
+                    player.Jump();
+                    state.jumpToggle = true;
+                } else if (state.GetState("J") == 0 && state.jumpToggle) state.jumpToggle = false;
+                if (state.GetState("S") == 1 && !state.shootToggle) {
+                    Bullet bullet = new Bullet(
+                            player.getXPos() + player.facing * 1.5f,
+                            player.getYPos() + player.getYRad() / 2,
+                            player.facing * 12,
+                            0,
+                            entities
+                    );
+                    state.shootToggle = true;
+                    entities.add(bullet);
+                } else if (state.GetState("S") == 0 && state.shootToggle) state.shootToggle = false;
             }
             InputStates.available.release();
         } catch (InterruptedException e) {}
@@ -94,65 +112,79 @@ public class GameController {
     }
 
     void handlePhysics() {
+        ArrayList<Entity> removal = new ArrayList<Entity>();
+
         for (Entity entity : entities) {
-            System.out.println("ENTITY: " + entity.getXPos() + " " + entity.getYPos());
             float prevX = entity.getXPos();
             float prevY = entity.getYPos();
             boolean collided = false;
+
             if (entity.useGravity) {
-                entity.modYSpeed(gravity * deltaTime);
-                if (entity.grounded) entity.setYSpeed(10);
+                int velocDir = (int)Math.signum(entity.getYSpeed());
+                int gravDir = (int)Math.signum(gravity);
+                entity.modYSpeed(gravity * deltaTime * ((velocDir == gravDir) ? 1.5f : 1));
             }
+
             entity.move(deltaTime);
-            entity.setXRad(entity.getXRad() % map.maxArenaX);
+            if (entity.getXPos() + entity.getXRad() < 0) entity.setXPos(map.maxArenaX);
+            else if (entity.getXPos() > map.maxArenaX) entity.setXPos(-entity.getXRad());
+
             entity.grounded = false;
             for (Block other:map.blocks) {
                 int dir = entity.isCollided(other);
                 if (dir % 2 == 1) {
                     entity.setYPos(prevY);
                     entity.setYSpeed(0);
-                    System.out.println("Yzz");
                     if (dir == 1) entity.grounded = true;
                 } else if (dir % 2 == 0) {
                     entity.setXPos((prevX));
                     entity.setXSpeed(0);
-                    System.out.println("X");
                 }
                 if (dir != -1) {
-                    System.out.println("BLOCK: " + other.getXPos() + " " + other.getYPos());
+                    if (entity.OnCollision(other)) removal.add(entity);
                     break;
                 }
             }
+
             for (Entity other:entities) {
                 if (other == entity) continue;
+
                 int dir = entity.isCollided(other);
-                if (dir == 1) {
+                if (dir % 2 == 1) {
                     entity.setYPos(prevY);
                     entity.setYSpeed(0);
-                } else if (dir == 2) {
+                    if (dir == 1) entity.grounded = true;
+                } else if (dir % 2 == 0) {
                     entity.setXPos((prevX));
                     entity.setXSpeed(0);
                 }
-                if (dir != 0) {
-                    System.out.println("HIT! MAP" + dir);
+                if (dir != -1) {
+                    if (entity.OnCollision(other)) removal.add(entity);
                     break;
                 }
-
             }
+        }
+        for (Entity i : removal) {
+            entities.remove(i);
         }
     }
 
     void outputData() {
         String message = "DATA(";
         for (Entity entity : entities) {
-            message += String.format("A(AT%d_AN%d_PX%f_PY%f_SX%f_SY%f)",
-                    entity.getEntityType(),
-                    entity.getEntityNumber(),
-                    entity.getXPos(),
-                    entity.getYPos(),
-                    entity.getXSpeed(),
-                    entity.getYSpeed()
-            );
+            if (entity.getState() > 0) {
+                message += String.format("A(AT%d_AN%d_AX%d_PX%f_PY%f_SX%f_SY%f)",
+                        entity.getEntityType(),
+                        entity.getEntityNumber(),
+                        entity.getState(),
+                        entity.getXPos(),
+                        entity.getYPos(),
+                        entity.getXSpeed(),
+                        entity.getYSpeed()
+                );
+            } else {
+                entity.zeroState();
+            }
         }
         message += ")";
 

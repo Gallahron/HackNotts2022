@@ -28,6 +28,8 @@ public class Arena {
                 "XXXXXXXXXXXXXXXXXXXX"
         };
         ParseMap(mapData);
+        blocks.add(new Block(-1, 0));
+        blocks.add(new Block(maxArenaX, 0));
     }
 
     public void AddBlock(float x, float y) {

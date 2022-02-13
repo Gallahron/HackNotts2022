@@ -1,14 +1,10 @@
 package Main;
 
 import Game.GameController;
-import Game.GameState;
 import Server.Server;
 import Server.GetIP;
 
-import java.util.*;
-
 public class Main {
-    public static GameState state;
     public static Server server;
     public static GameController gameController;
 

@@ -15,6 +15,9 @@ public class InputState {
         state.put("E", 0);
     }
 
+    public boolean shootToggle;
+    public boolean jumpToggle;
+
     public void UpdateState(String key, Integer value) {
         if (state.containsKey(key)) {
             state.put(key, value);

@@ -24,6 +24,7 @@ add_executable(HN22-Client
 	"${PROJECT_SOURCE_DIR}/src/listener.c"
 	"${PROJECT_SOURCE_DIR}/src/parse.c"
 	"${PROJECT_SOURCE_DIR}/src/map.c"
+	"${PROJECT_SOURCE_DIR}/src/input.c"
 )
 
 # link libraries

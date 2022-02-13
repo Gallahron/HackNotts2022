@@ -15,6 +15,7 @@
 #include "state.h"
 #include "render.h"
 #include "listener.h"
+#include "input.h"
 
 #include "game.h"
 
@@ -29,6 +30,7 @@ int game(struct in_addr server_addr, bool verbose)
 {
 	int exit_code = EX_OK;
 	struct StateManager* state_mgr = NULL;
+	struct InputManager* input_mgr = NULL;
 	struct ListenerState* listener = NULL;
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
@@ -54,7 +56,12 @@ int game(struct in_addr server_addr, bool verbose)
 		goto cleanup;
 	}
 
-	if (!(listener = listener_init(state_mgr, server_addr))) {
+	if (!(input_mgr = input_mgr_init())) {
+		exit_code = EX_SOFTWARE;
+		goto cleanup;
+	}
+
+	if (!(listener = listener_init(state_mgr, input_mgr, server_addr))) {
 		exit_code = EX_SOFTWARE;
 		goto cleanup;
 	}
@@ -83,10 +90,10 @@ int game(struct in_addr server_addr, bool verbose)
 				}
 				break;
 			case SDL_KEYDOWN:
-				//keypress(state, event.key.keysym.sym, true);
+				keypress(input_mgr, event.key.keysym.sym, true);
 				break;
 			case SDL_KEYUP:
-				//keypress(state, event.key.keysym.sym, false);
+				keypress(input_mgr, event.key.keysym.sym, false);
 				break;
 			case SDL_QUIT:
 				quit = true;
@@ -109,6 +116,9 @@ cleanup:
 
 	if (state_mgr)
 		state_mgr_destroy(state_mgr);
+
+	if (input_mgr)
+		input_mgr_destroy(input_mgr);
 
 	SDL_Quit();
 

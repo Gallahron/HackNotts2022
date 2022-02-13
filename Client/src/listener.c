@@ -9,6 +9,7 @@
 
 #include <SDL_net.h>
 
+#include "input.h"
 #include "log.h"
 #include "state.h"
 #include "parse.h"
@@ -19,7 +20,7 @@
 #define PACKET_SIZE 8192
 #define INPUT_SEND_FREQ 60
 
-struct ListenerState* listener_init(struct StateManager* state_mgr, struct in_addr server_addr);
+struct ListenerState* listener_init(struct StateManager* state_mgr, struct InputManager* input_mgr, struct in_addr server_addr);
 void listener_destroy(struct ListenerState* listener);
 void* listener(void* args);
 int randrange(int min, int max);
@@ -28,11 +29,12 @@ struct ListenerState {
 	pthread_t thread_id;
 	struct ListenerArgs {
 		struct StateManager* state_mgr;
+		struct InputManager* input_mgr;
 		struct in_addr* server_addr;
 	} args;
 };
 
-struct ListenerState* listener_init(struct StateManager* state_mgr, struct in_addr server_addr)
+struct ListenerState* listener_init(struct StateManager* state_mgr, struct InputManager* input_mgr, struct in_addr server_addr)
 {
 	struct ListenerState* listener_state = NULL;
 	struct in_addr* server_addr_mem;
@@ -46,6 +48,7 @@ struct ListenerState* listener_init(struct StateManager* state_mgr, struct in_ad
 	*server_addr_mem = server_addr;
 
 	listener_state->args.state_mgr = state_mgr;
+	listener_state->args.input_mgr = input_mgr;
 	listener_state->args.server_addr = server_addr_mem;
 
 	if (pthread_create(&listener_state->thread_id, NULL, &listener, &listener_state->args) != 0)
@@ -134,6 +137,7 @@ void* listener(void* listener_args)
 
 		if (SDLNet_SocketReady(socket)) {
 			if (SDLNet_UDP_Recv(socket, packet_receiving)) {
+
 				struct State* state = args.state_mgr->back;
 
 				parse_msg(state, (char* ) packet_receiving->data, packet_receiving->len);
@@ -147,9 +151,17 @@ void* listener(void* listener_args)
 			}
 		}
 
-		if (0/*INPUTS TO SEND*/) {
-			// send inputs
-		}
+		struct InputManager* input_mgr = args.input_mgr;
+		pthread_mutex_lock(&input_mgr->mutex);
+		bool i_l = input_mgr->left, i_r = input_mgr->right, i_j = input_mgr->jump, i_s = input_mgr->shoot;
+		pthread_mutex_unlock(&input_mgr->mutex);
+
+		int data_len = snprintf((char* ) packet_sending->data, packet_sending->maxlen, "INPT(ID%d_L%d_R%d_J%d_S%d)", machine_id, i_l, i_r, i_j, i_s);
+		if (data_len < 0 || data_len >= PACKET_SIZE)
+			return NULL;
+		packet_sending->len = data_len + 1;
+		packet_sending->address = address_server;
+		SDLNet_UDP_Send(socket, -1, packet_sending);
 	}
 
 listener_cleanup:

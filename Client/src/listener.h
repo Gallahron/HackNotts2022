@@ -5,10 +5,11 @@
 #include <arpa/inet.h>
 
 #include "state.h"
+#include "input.h"
 
 struct ListenerState;
 
-struct ListenerState* listener_init(struct StateManager* state_mgr, struct in_addr server_addr);
+struct ListenerState* listener_init(struct StateManager* state_mgr, struct InputManager* input_mgr, struct in_addr server_addr);
 void listener_destroy(struct ListenerState* listener);
 
 #endif

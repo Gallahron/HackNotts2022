@@ -74,7 +74,7 @@ void render(struct State* state, struct Textures* textures, SDL_Renderer* render
 {
 	SDL_Rect rect;
 
-	SDL_SetRenderDrawColor(renderer, 0x51, 0x88, 0xF7, 255);
+	SDL_SetRenderDrawColor(renderer, 0x68, 0x9F, 0xff, 255);
 	SDL_RenderClear(renderer);
 
 	rect = (SDL_Rect) {

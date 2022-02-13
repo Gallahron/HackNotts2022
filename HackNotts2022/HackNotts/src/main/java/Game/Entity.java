@@ -1,8 +1,9 @@
 package Game;
 
-import java.util.PropertyResourceBundle;
-
 public class Entity {
+    public boolean useGravity;
+    public boolean grounded = false;
+
     private int entityType;
     private int entityNumber;
 
@@ -12,18 +13,20 @@ public class Entity {
     private float xSpeed;
     private float ySpeed;
 
-    private float xRad;
-    private float yRad;
+    private float xSize;
+    private float ySize;
 
-    public Entity(float x, float y, float xSpeed, float ySpeed, float xRad, float yRad, int entityNumber, int entityType) {
+
+    public Entity(float x, float y, float xSpeed, float ySpeed, float xSize, float ySize, int entityNumber, int entityType, boolean useGravity) {
         this.xPos = x;
         this.yPos = y;
         this.xSpeed = xSpeed;
         this.ySpeed = ySpeed;
-        this.xRad = xRad;
-        this.yRad = yRad;
+        this.xSize = xSize;
+        this.ySize = ySize;
         this.entityNumber = entityNumber;
         this.entityType = entityType;
+        this.useGravity = useGravity;
     }
 
     public float getXPos() {
@@ -49,6 +52,9 @@ public class Entity {
     public void setXSpeed(float xSpeed) {
         this.xSpeed = xSpeed;
     }
+    public void modXSpeed(float speed) {
+        this.xSpeed += speed;
+    }
 
     public float getYSpeed() {
         return ySpeed;
@@ -57,21 +63,24 @@ public class Entity {
     public void setYSpeed(float ySpeed) {
         this.ySpeed = ySpeed;
     }
+    public void modYSpeed(float speed) {
+        this.ySpeed += speed;
+    }
 
     public float getXRad() {
-        return xRad;
+        return xSize;
     }
 
     public void setXRad(float xRad) {
-        this.xRad = xRad;
+        this.xSize = xRad;
     }
 
     public float getYRad() {
-        return yRad;
+        return ySize;
     }
 
     public void setYRad(float yRad) {
-        this.yRad = yRad;
+        this.ySize = yRad;
     }
 
     public int getEntityType() {
@@ -101,13 +110,16 @@ public class Entity {
     }
 
     public int isCollided(Entity other, boolean swap) {
-        if (other.pointInEntity(xPos + xRad, yPos) || other.pointInEntity(xPos - xRad, yPos) ) return 2;
-        if (other.pointInEntity(xPos, yPos + yRad) || other.pointInEntity(xPos, yPos - yRad)) return 1;
+        //System.out.println("X Y "+ xPos + " " + yPos);
+        if (other.pointInEntity(xPos , yPos + ySize/8) || other.pointInEntity(xPos, yPos + 7 * ySize/8)) return 0;
+        if (other.pointInEntity(xPos + xSize , yPos + ySize/8) || other.pointInEntity(xPos + xSize, yPos + 7 * ySize/8) ) return 2;
+        if (other.pointInEntity(xPos + 7*xSize/8, yPos) || other.pointInEntity(xPos + xSize/8, yPos)) return 1;
+        if (other.pointInEntity(xPos + 7*xSize/8, yPos + ySize) || other.pointInEntity(xPos + xSize/8, yPos+ySize)) return 3;
 
         if (swap) {
-            return isCollided(this, false);
+            return other.isCollided(this, false);
         }
-        return 0;
+        return -1;
     }
 
     public int isCollided(Entity other) {
@@ -115,7 +127,12 @@ public class Entity {
     }
 
     public boolean pointInEntity(float x, float y) {
-        if (x < xPos + xRad && x > xPos - yRad && y < yPos + yRad && y > yPos - yRad) {
+        /*System.out.println("1: " + x + " " + (xPos + xRad));
+        System.out.println("2: " + x + " " + (xPos - xRad));
+        System.out.println("3: " + y + " " + (yPos + yRad));
+        System.out.println("4: " + y + " " + (yPos - yRad));*/
+
+        if (x <= xPos + xSize && x >= xPos && y <= yPos + ySize && y >= yPos) {
             return true;
         }
         return false;

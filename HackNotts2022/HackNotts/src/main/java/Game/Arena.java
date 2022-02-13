@@ -37,7 +37,7 @@ public class Arena {
     public void ParseMap(String[] data) {
         for (int x = 0; x < maxArenaX; x++) {
             for (int y = 0; y < maxArenaY; y++) {
-                if (data[maxArenaY - y - 1].charAt(x) == 'X') AddBlock(x + 0.5f, y + 0.5f);
+                if (data[maxArenaY - y - 1].charAt(x) == 'X') AddBlock(x, y);
             }
         }
     }

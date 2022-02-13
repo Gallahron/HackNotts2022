@@ -36,7 +36,7 @@ public class GameController {
                 handlePhysics();
 
                 outputData();
-                draw();
+                //draw();
 
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -92,7 +92,7 @@ public class GameController {
     void handlePhysics() {
         for (Entity entity : entities) {
             entity.move(deltaTime);
-            System.out.println(entity.getXPos());
+            //System.out.println(entity.getXPos());
         }
     }
 

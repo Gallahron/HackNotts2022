@@ -32,6 +32,7 @@ int game(struct in_addr server_addr, bool verbose)
 	struct StateManager* state_mgr = NULL;
 	struct InputManager* input_mgr = NULL;
 	struct ListenerState* listener = NULL;
+	struct Textures* textures = NULL;
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
 	SDL_TimerID timer_tick = 0;
@@ -66,6 +67,11 @@ int game(struct in_addr server_addr, bool verbose)
 		goto cleanup;
 	}
 
+	if (!(textures = tex_init(renderer))) {
+		exit_code = EX_SOFTWARE;
+		goto cleanup;
+	}
+
 	SDL_SetWindowMinimumSize(window, 640, 480);
 	SDL_SetWindowMaximumSize(window, 640, 480);
 
@@ -84,7 +90,7 @@ int game(struct in_addr server_addr, bool verbose)
 				{
 					pthread_mutex_lock(&state_mgr->mutex);
 					
-					render(state_mgr->front, renderer);
+					render(state_mgr->front, textures, renderer);
 
 					pthread_mutex_unlock(&state_mgr->mutex);
 				}
@@ -102,6 +108,9 @@ int game(struct in_addr server_addr, bool verbose)
 	}
 
 cleanup:
+	if (textures)
+		tex_destroy(textures);
+
 	if (timer_tick != 0)
 		SDL_RemoveTimer(timer_tick);
 

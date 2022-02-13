@@ -9,9 +9,24 @@
 
 #include "parse.h"
 
+enum DataParsedType {
+	DPT_ACTOR,
+	DPT_FINISHED,
+};
+
+enum ActorType {
+	AT_PLAYER = 0,
+	AT_BULLET = 1,
+};
+
+struct Finished {
+	int example_value;
+};
+
 int parse_conn(struct State* state, char* msg, size_t msg_len);
 bool parse_msg(struct State* state, const char* msg, size_t msg_len);
-bool is_numeric(char c);
+const char* parse_actor(const char* msg, void** data_parsed, enum ActorType* data_parsed_type);
+const char* parse_finished(const char* msg, void** data_parsed);
 
 int parse_conn(struct State* state, char* msg, size_t msg_len)
 {
@@ -42,167 +57,175 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 	state->bullet_count = 0;
 	state->player_count = 0;
 
-	/*
-	DATA(A(AT1_AN0_PX5767.653320_PY0.000000_SX32.000000_SY0.000000)A(AT0_AN1_PX0.000000_PY5574.660156_SX0.000000_SY32.000000))
-	*/
 
-	// const char msg_type_data_str[] = "DATA(";
-	// if (strncmp(msg, msg_type_data_str, sizeof(msg_type_data_str)) != 0)
-	// 	return false;
+	const char msg_type_data_str[] = "DATA(";
+	if (strncmp(msg, msg_type_data_str, sizeof(msg_type_data_str) - 1) != 0)
+		return false;
 
-	// msg += sizeof(msg_type_data_str) - 1;
+	msg += sizeof(msg_type_data_str) - 1;
 
-	// const char msg_subtype_actor_str[] = "A(";
-	// const char msg_subtype_finished_str[] = "F(";
-	// if (strncmp(msg, msg_subtype_actor_str, sizeof(msg_subtype_actor_str)) == 0) {
-	// 	actor = parse_actor(msg, &msg);
-	// } else if (strncmp(msg, msg_subtype_finished_str, sizeof(msg_subtype_finished_str)) == 0) {
-	// 	finished = parse_finished(msg, &msg);
-	// } else {
-	// 	return false;
-	// }
-
-	// return true;
-
-	const char* c = msg;
-
-	while (*c != ')') { 
-		//Move to char after (
-		while (*(++c) != '(');
-		c++;
-		c++;
-		c++;
-
-		struct Entity* entity = malloc(sizeof(struct Entity));
-		int entity_type;
-		int entity_number;
-		int entity_state;
-		
-		while (*c != ')') {
-			char* type = malloc(sizeof(char) * 2);
-			char* type_ptr = type;
-			char* value = malloc(sizeof(char) * 20);
-			char* value_ptr = value;
-			int index = 0;
-			
-			while (!is_numeric(*c) && index < 3) {
-				type_ptr[index] = *c;
-				c++;
-				index++;
-			}
-			if (index == 3) {
-				fprintf(stderr, "Error5");
-				return false;
-			}
-			index = 0;
-			while (*c != '_' && *c != ')' && index < 21) {
-				value_ptr[index] = *c;
-				c++;
-				index++;
-			}
-			if (index == 21) {
-				fprintf(stderr, "Error5");
-				return false;
-			}
-			if (*c == '_') c++;
-
-			switch (type[0]) {
-				case 'A':
-					switch(type[1]) {
-						case 'T':
-							entity_type = atoi(value);
-							break;
-						case 'N':
-							entity_number = atoi(value);
-							break;
-						case 'X':
-							entity_state = atoi(value);
-							break;
-						default:
-							fprintf(stderr, "Error1");
-							return false;
-					}
-					break;
-				case 'P':
-					switch(type[1]) {
-						case 'X':
-							entity->pos_x = atof(value);
-							break;
-						case 'Y':
-							entity->pos_y = atof(value);
-							break;
-						default:
-							fprintf(stderr, "Error2");
-							return false;
-					}
-					break;
-				case 'S':
-					switch(type[1]) {
-						case 'X':
-							entity->speed_x = atof(value);
-							break;
-						case 'Y':
-							entity->speed_y = atof(value);
-							break;
-						default:
-							fprintf(stderr, "Error3");
-							return false;
-					}
-					break;
-				default:
-					fprintf(stderr, "Error4");
-					return false;
-			}
-			
+	while (*msg != ')' && *msg != '\0') {
+		const char msg_subtype_actor_str[] = "A(";
+		const char msg_subtype_finished_str[] = "F(";
+		void* data_parsed;
+		enum DataParsedType data_parsed_type;
+		enum ActorType actor_type;
+		if (strncmp(msg, msg_subtype_actor_str, sizeof(msg_subtype_actor_str) - 1) == 0) {
+			data_parsed_type = DPT_ACTOR;
+			msg = parse_actor(msg + sizeof(msg_subtype_actor_str) - 1, &data_parsed, &actor_type);
+		} else if (strncmp(msg, msg_subtype_finished_str, sizeof(msg_subtype_finished_str) - 1) == 0) {
+			data_parsed_type = DPT_FINISHED;
+			msg = parse_finished(msg + sizeof(msg_subtype_finished_str) - 1, &data_parsed);
+		} else {
+			return false;
 		}
 
-		switch (entity_type) {
-			case 1: {
-				struct Bullet* bullet = malloc(sizeof(struct Bullet));
-				bullet->entity = *entity;
-				switch (entity_number) {
-					case 1:
-						bullet->type = BL_BOMB;
-						break;
-					default:
-						bullet->type = BL_STANDARD;
-				}
-				bullet->time_left = entity_state;
 
-				state->bullets[state->bullet_count] = *bullet;
-				state->bullet_count++;
+		switch (data_parsed_type) {
+		case DPT_ACTOR: {
+			switch (actor_type) {
+			case AT_PLAYER: {
+				struct Player* player = (struct Player*) data_parsed;
+				if (state->player_count < MAX_PLAYERS)
+					state->players[state->player_count++] = *player;
+
+				free(player);
 				break;
 			}
-			case 0: {
-				struct Player* player = malloc(sizeof(*player));
-				player->entity = *entity;
-				free(entity);
-				player->player_number = entity_number;
-				player->lives = entity_state;
+			case AT_BULLET: {
+				struct Bullet* bullet = (struct Bullet*) data_parsed;
+				if (state->bullet_count < MAX_BULLETS)
+					state->bullets[state->bullet_count++] = *bullet;
 
-				state->players[state->player_count] = *player;
-				state->player_count++;
+				free(bullet);
 				break;
 			}
+			}
+			break;
 		}
-		c++;
+		case DPT_FINISHED: {
+			struct Finished* finished = (struct Finished*) data_parsed;
+			print_debug("Parsed example_value %d from F() message", finished->example_value);
+			free(finished);
+			break;
+		}
+		}
 	}
-
-	for (int i = 0; i < (int) state->bullet_count; i++) {
-		fprintf(stderr, "BULLET %u - X: %f, Y: %f\n", state->bullets[i].type, state->bullets[i].entity.pos_x, state->bullets[i].entity.pos_y);
-	}
-	for (int i = 0; i < (int) state->player_count; i++) {
-		fprintf(stderr, "PLAYER %u - X: %f, Y: %f\n", state->players[i].player_number, state->players[i].entity.pos_x, state->players[i].entity.pos_y);
-	}
-
-	fprintf(stderr,"\n");
-	//print_info("Trying to parse msg, but not done yet :(");
-	//print_info("Msg: %.*s",msg_len, msg);
 
 	return true;
 }
 
-bool is_numeric(char c)
+const char* parse_actor(const char* msg, void** data_parsed, enum ActorType* actor_type)
 {
-	return c == '-' || (c >= '0' && c <= '9');
+	char* msg_tmp;
+	int p_at, p_an;
+	double p_px, p_py, p_sx, p_sy;
+
+	while (true) {
+		if (*msg == ')' || *msg == '\0') {
+			break;
+		} else if (strncmp(msg, "AT", 2) == 0) {
+			msg += 2;
+			p_at = strtol(msg, &msg_tmp, 10);
+			msg = msg_tmp + 1;
+		} else if (strncmp(msg, "AN", 2) == 0) {
+			msg += 2;
+			p_an = strtol(msg, &msg_tmp, 10);
+			msg = msg_tmp + 1;
+		} else if (strncmp(msg, "PX", 2) == 0) {
+			msg += 2;
+			p_px = strtod(msg, &msg_tmp);
+			msg = msg_tmp + 1;
+		} else if (strncmp(msg, "PY", 2) == 0) {
+			msg += 2;
+			p_py = strtod(msg, &msg_tmp);
+			msg = msg_tmp + 1;
+		} else if (strncmp(msg, "SX", 2) == 0) {
+			msg += 2;
+			p_sx = strtod(msg, &msg_tmp);
+			msg = msg_tmp + 1;
+		} else if (strncmp(msg, "SY", 2) == 0) {
+			msg += 2;
+			p_sy = strtod(msg, &msg_tmp);
+			msg = msg_tmp + 1;
+		} else {
+			break;
+		}
+	}
+
+	*actor_type = p_at;
+	switch ((enum ActorType) p_at) {
+	case AT_PLAYER: {
+		struct Player* player;
+		if (!(player = malloc(sizeof(*player)))) {
+			print_err("Could not malloc player in parser");
+			return NULL;
+		}
+
+		player->player_number = p_an;
+		player->entity.pos_x = p_px;
+		player->entity.pos_y = p_py;
+		player->entity.speed_x = p_sx;
+		player->entity.speed_y = p_sy;
+
+		*data_parsed = (void*) player;
+
+		break;
+	}
+	case AT_BULLET: {
+		struct Bullet* bullet;
+		if (!(bullet = malloc(sizeof(*bullet)))) {
+			print_err("Could not malloc bullet in parser");
+			return NULL;
+		}
+
+		bullet->type = p_an;
+		bullet->entity.pos_x = p_px;
+		bullet->entity.pos_y = p_py;
+		bullet->entity.speed_x = p_sx;
+		bullet->entity.speed_y = p_sy;
+
+		*data_parsed = (void*) bullet;
+
+		break;
+	}
+	}
+
+	if (*msg == ')')
+		msg++;
+
+	return msg;
+}
+
+const char* parse_finished(const char* msg, void** data_parsed)
+{
+	char* msg_tmp;
+	int p_ex;
+
+	while (true) {
+		if (*msg == ')' || *msg == '\0') {
+			break;
+		} else if (strncmp(msg, "EX", 2) == 0) {
+			msg += 2;
+			p_ex = strtol(msg, &msg_tmp, 10);
+			msg = msg_tmp + 1;
+		} else {
+			break;
+		}
+	}
+
+	struct Finished* finished;
+	if (!(finished = malloc(sizeof(*finished)))) {
+		print_err("Could not malloc finished in parser");
+		return NULL;
+	}
+
+	finished->example_value = p_ex;
+
+	*data_parsed = (void*) finished;
+
+	if (*msg == ')')
+		msg++;
+
+	return msg;
 }

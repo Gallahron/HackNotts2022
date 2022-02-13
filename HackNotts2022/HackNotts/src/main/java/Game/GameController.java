@@ -61,7 +61,7 @@ public class GameController {
             InputStates.available.acquire();
             for (int i = 1; i < PlayerManager.currPlayer; i++) {
                 if (i > players.size()) {
-                    Player player = new Player(i, 2 + 3 * (i-1), 2f, 3, 0);
+                    Player player = new Player(i, (2 + 3 * (i-1)) % map.maxArenaX, 2f, 3, 0);
                     players.add(player);
                     entities.add(player);
                 }

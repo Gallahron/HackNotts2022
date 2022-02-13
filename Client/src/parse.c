@@ -118,7 +118,7 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 const char* parse_actor(const char* msg, void** data_parsed, enum ActorType* actor_type)
 {
 	char* msg_tmp;
-	int p_at, p_an;
+	int p_at, p_an, p_ax;
 	double p_px, p_py, p_sx, p_sy;
 
 	while (true) {
@@ -132,7 +132,11 @@ const char* parse_actor(const char* msg, void** data_parsed, enum ActorType* act
 			msg += 2;
 			p_an = strtol(msg, &msg_tmp, 10);
 			msg = msg_tmp + 1;
-		} else if (strncmp(msg, "PX", 2) == 0) {
+		} else if (strncmp(msg, "AX", 2) == 0) {
+			msg += 2;
+			p_ax = strtol(msg, &msg_tmp, 10);
+			msg = msg_tmp + 1;
+		}else if (strncmp(msg, "PX", 2) == 0) {
 			msg += 2;
 			p_px = strtod(msg, &msg_tmp);
 			msg = msg_tmp + 1;
@@ -163,6 +167,7 @@ const char* parse_actor(const char* msg, void** data_parsed, enum ActorType* act
 		}
 
 		player->player_number = p_an;
+		player->lives = p_ax;
 		player->entity.pos_x = p_px;
 		player->entity.pos_y = p_py;
 		player->entity.speed_x = p_sx;
@@ -180,6 +185,7 @@ const char* parse_actor(const char* msg, void** data_parsed, enum ActorType* act
 		}
 
 		bullet->type = p_an;
+		bullet->time_left = p_ax;
 		bullet->entity.pos_x = p_px;
 		bullet->entity.pos_y = p_py;
 		bullet->entity.speed_x = p_sx;

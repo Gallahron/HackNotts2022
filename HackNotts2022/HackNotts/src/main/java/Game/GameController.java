@@ -172,7 +172,6 @@ public class GameController {
     void outputData() {
         String message = "DATA(";
         for (Entity entity : entities) {
-            if (entity.getState() > 0) {
                 message += String.format("A(AT%d_AN%d_AX%d_PX%f_PY%f_SX%f_SY%f)",
                         entity.getEntityType(),
                         entity.getEntityNumber(),
@@ -182,9 +181,8 @@ public class GameController {
                         entity.getXSpeed(),
                         entity.getYSpeed()
                 );
-            } else {
-                entity.zeroState();
-            }
+            if (entity.getState() == 0) entity.zeroState();
+
         }
         message += ")";
 

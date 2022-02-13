@@ -1,4 +1,5 @@
 #include <SDL_render.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
 
 #include "state.h"
@@ -25,6 +26,13 @@
 
 #define HEART_SIZE 20
 #define HEART_SPACING 10
+
+TTF_Font* font;
+
+void loadFont() {
+	TTF_Init();
+	font = TTF_OpenFont("./resources/Rowdies-Regular.ttf", 30);
+}
 
 void render(struct State* state, SDL_Renderer* renderer);
 
@@ -70,17 +78,32 @@ void render(struct State* state, SDL_Renderer* renderer)
 
 		SDL_RenderFillRect(renderer, &rect);
 
-		fprintf(stderr,"Playerno: %u\n", state->player_number_self);
 		if ((int)player->player_number == state->player_number_self) {
-			for (unsigned int i = 0; i < player->lives; i++) {
+			if (player->lives > 0) {
+				for (unsigned int i = 0; i < player->lives; i++) {
+					rect = (SDL_Rect) {
+						.x = i * (HEART_SIZE + HEART_SPACING) + HEART_SPACING,
+						.y = HEART_SPACING,
+						.w = HEART_SIZE,
+						.h = HEART_SIZE,
+					};
+					
+					SDL_RenderFillRect(renderer, &rect);
+				}
+			} else {
+				if (!font) fprintf(stderr, "ERROR IN FONT LOADING!\n");
+				SDL_Color red = {255,0,0};
+				SDL_Surface* surface_message = TTF_RenderText_Solid(font, "You Lose...", red);
+				SDL_Texture* message = SDL_CreateTextureFromSurface(renderer, surface_message);
 				rect = (SDL_Rect) {
-					.x = i * (HEART_SIZE + HEART_SPACING) + HEART_SPACING,
-					.y = HEART_SPACING,
-					.w = HEART_SIZE,
-					.h = HEART_SIZE,
+					.x = 30,
+					.y = 0,
+					.w = 600,
+					.h = 300,
 				};
-				
-				SDL_RenderFillRect(renderer, &rect);
+				SDL_RenderCopy(renderer, message, NULL, &rect);
+				SDL_FreeSurface(surface_message);
+				SDL_DestroyTexture(message);
 			}
 		}
 	}

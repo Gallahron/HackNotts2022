@@ -5,6 +5,7 @@
 
 #include "state.h"
 
+void loadFont();
 void render(struct State* state, SDL_Renderer* renderer);
 
 #endif

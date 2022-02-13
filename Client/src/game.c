@@ -72,6 +72,8 @@ int game(struct in_addr server_addr, bool verbose)
 	SDL_RegisterEvents(1);
 	timer_tick = SDL_AddTimer(16, tick_event, NULL);
 
+	loadFont();
+
 	bool quit = false;
 	while (!quit)
 	{

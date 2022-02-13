@@ -1,6 +1,8 @@
 package Game;
 
 public class Entity {
+    public final float terminalVelocity = 20;
+
     public boolean useGravity;
     public boolean grounded = false;
 
@@ -16,8 +18,10 @@ public class Entity {
     private float xSize;
     private float ySize;
 
+    private int state;
 
-    public Entity(float x, float y, float xSpeed, float ySpeed, float xSize, float ySize, int entityNumber, int entityType, boolean useGravity) {
+
+    public Entity(float x, float y, float xSpeed, float ySpeed, float xSize, float ySize, int entityNumber, int entityType, boolean useGravity, int initialState) {
         this.xPos = x;
         this.yPos = y;
         this.xSpeed = xSpeed;
@@ -27,6 +31,7 @@ public class Entity {
         this.entityNumber = entityNumber;
         this.entityType = entityType;
         this.useGravity = useGravity;
+        this.state = initialState;
     }
 
     public float getXPos() {
@@ -35,6 +40,7 @@ public class Entity {
 
     public void setXPos(float xPos) {
         this.xPos = xPos;
+        NormaliseSpeed();
     }
 
     public float getYPos() {
@@ -43,6 +49,7 @@ public class Entity {
 
     public void setYPos(float yPos) {
         this.yPos = yPos;
+        NormaliseSpeed();
     }
 
     public float getXSpeed() {
@@ -51,9 +58,20 @@ public class Entity {
 
     public void setXSpeed(float xSpeed) {
         this.xSpeed = xSpeed;
+        NormaliseSpeed();
     }
     public void modXSpeed(float speed) {
         this.xSpeed += speed;
+        NormaliseSpeed();
+    }
+
+    public void NormaliseSpeed() {
+        float speed = (float)Math.sqrt(xSpeed * xSpeed + ySpeed + ySpeed);
+        if (speed > terminalVelocity) {
+            float mod = terminalVelocity / speed;
+            this.xSpeed *= mod;
+            this.ySpeed *= mod;
+        }
     }
 
     public float getYSpeed() {
@@ -109,6 +127,15 @@ public class Entity {
         this.ySpeed = 0;
     }
 
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
+    public boolean zeroState() {return false;}
+
     public int isCollided(Entity other, boolean swap) {
         //System.out.println("X Y "+ xPos + " " + yPos);
         if (other.pointInEntity(xPos , yPos + ySize/8) || other.pointInEntity(xPos, yPos + 7 * ySize/8)) return 0;
@@ -137,4 +164,6 @@ public class Entity {
         }
         return false;
     }
+
+    public boolean OnCollision(Entity other){return false;}
 }

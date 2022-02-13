@@ -23,6 +23,9 @@
 #define BULLET_WIDTH (int) (BULLET_RATIO_X * (double) BLOCK_SIZE)
 #define BULLET_HEIGHT (int) (BULLET_RATIO_Y * (double) BLOCK_SIZE)
 
+#define HEART_SIZE 20
+#define HEART_SPACING 10
+
 void render(struct State* state, SDL_Renderer* renderer);
 
 void render(struct State* state, SDL_Renderer* renderer)
@@ -66,6 +69,20 @@ void render(struct State* state, SDL_Renderer* renderer)
 		};
 
 		SDL_RenderFillRect(renderer, &rect);
+
+		fprintf(stderr,"Playerno: %u\n", state->player_number_self);
+		if ((int)player->player_number == state->player_number_self) {
+			for (unsigned int i = 0; i < player->lives; i++) {
+				rect = (SDL_Rect) {
+					.x = i * (HEART_SIZE + HEART_SPACING) + HEART_SPACING,
+					.y = HEART_SPACING,
+					.w = HEART_SIZE,
+					.h = HEART_SIZE,
+				};
+				
+				SDL_RenderFillRect(renderer, &rect);
+			}
+		}
 	}
 
 	SDL_SetRenderDrawColor(renderer, 0x25, 0x25, 0x25, 0xFF);

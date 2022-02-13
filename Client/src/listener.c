@@ -130,7 +130,10 @@ void* listener(void* listener_args)
 	if (player_number <= 0)
 		goto listener_cleanup;
 
+	pthread_mutex_lock(&args.state_mgr->mutex);
 	args.state_mgr->back->player_number_self = player_number;
+	args.state_mgr->front->player_number_self = player_number;
+	pthread_mutex_unlock(&args.state_mgr->mutex);
 
 	struct InputManager* input_mgr = args.input_mgr;
 

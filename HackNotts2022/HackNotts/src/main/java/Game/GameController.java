@@ -23,7 +23,7 @@ public class GameController {
 
     public GameController(Server server) {
         this.server = server;
-        entities.add(new Bullet(0,2,1,1));
+        //entities.add(new Bullet(0.04f,2,1,1));
         map = new Arena();
         updateTime();
     }
@@ -38,7 +38,7 @@ public class GameController {
                 handlePhysics();
 
                 outputData();
-                draw();
+                //draw();
 
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -59,7 +59,7 @@ public class GameController {
             InputStates.available.acquire();
             for (int i = 1; i < PlayerManager.currPlayer; i++) {
                 if (i > players.size()) {
-                    Player player = new Player(i,0,0,0,1);
+                    Player player = new Player(i,1,0,0,1);
                     players.add(player);
                     entities.add(player);
                 }
@@ -81,7 +81,7 @@ public class GameController {
                 case (0) -> display = '0';
                 case (1) -> display = '-';
             }
-            out[(int)(map.maxArenaY - (entity.getYPos()) % map.maxArenaY) - 1].setCharAt((int)(entity.getXPos()) % map.maxArenaX, display);
+            out[(int)(map.maxArenaY - (entity.getYPos()) % map.maxArenaY)].setCharAt((int)(entity.getXPos()) % map.maxArenaX, display);
         }
         System.out.println(deltaTime);
         System.out.println("-----------");
@@ -133,7 +133,7 @@ public class GameController {
     }
 
     void outputData() {
-        String message = "DATA[";
+        String message = "DATA(";
         for (Entity entity : entities) {
             message += String.format("A(AT%d_AN%d_PX%f_PY%f_SX%f_SY%f)",
                     entity.getEntityType(),
@@ -144,7 +144,7 @@ public class GameController {
                     entity.getYSpeed()
             );
         }
-        message += "]";
+        message += ")";
 
         //System.out.println(message);
         for (NetworkPlayer i : PlayerManager.playerLookup.values()) {

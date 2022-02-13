@@ -100,17 +100,24 @@ public class Entity {
         this.ySpeed = 0;
     }
 
+    public int isCollided(Entity other, boolean swap) {
+        if (other.pointInEntity(xPos + xRad, yPos) || other.pointInEntity(xPos - xRad, yPos) ) return 2;
+        if (other.pointInEntity(xPos, yPos + yRad) || other.pointInEntity(xPos, yPos - yRad)) return 1;
+
+        if (swap) {
+            return isCollided(this, false);
+        }
+        return 0;
+    }
+
     public int isCollided(Entity other) {
-        int dir;
-        float left = xPos + xRad - (other.xPos - other.xRad);
-        float right = xPos - xRad - (other.xPos + other.xRad);
-        float top = yPos + yRad - (other.yPos - other.yRad);
-        float bottom = yPos - yRad - (other.yPos + other.yRad);
-        if (!(left > 0 && (bottom > 0 ||  top > 0)) || (right > 0 && (bottom > 0 || top > 0))) return 0;
+        return isCollided(other, true);
+    }
 
-        float xMax = left > right ? left : right;
-        float yMax = top > bottom ? top : bottom;
-
-        return xMax > yMax ? 2 : 1;
+    public boolean pointInEntity(float x, float y) {
+        if (x < xPos + xRad && x > xPos - yRad && y < yPos + yRad && y > yPos - yRad) {
+            return true;
+        }
+        return false;
     }
 }

@@ -80,7 +80,7 @@ public class GameController {
                             player.getXPos() + player.facing * 1.5f,
                             player.getYPos() + player.getYRad() / 2,
                             player.facing * 12,
-                            0,
+                            (float) (-0.1 + Math.random() * (0.1 - -0.1)),
                             entities
                     );
                     state.shootToggle = true;

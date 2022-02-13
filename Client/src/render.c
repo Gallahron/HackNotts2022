@@ -1,4 +1,5 @@
 #include <SDL_render.h>
+#include <SDL_timer.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,17 +75,37 @@ void render(struct State* state, struct Textures* textures, SDL_Renderer* render
 {
 	SDL_Rect rect;
 
+	int cloud_offset = (SDL_GetTicks() / 128) % 640;
+
+	if (cloud_offset >= 640)
+		cloud_offset = 0;
+
 	SDL_SetRenderDrawColor(renderer, 0x68, 0x9F, 0xFF, 255);
 	SDL_RenderClear(renderer);
 
 	rect = (SDL_Rect) {
-		.x = 0,
+		.x = cloud_offset,
 		.y = 0,
 		.w = 640,
 		.h = 480,
 	};
-
 	SDL_RenderCopy(renderer, textures->tex_clouds, NULL, &rect);
+	rect = (SDL_Rect) {
+		.x = cloud_offset + 640,
+		.y = 0,
+		.w = 640,
+		.h = 480,
+	};
+	SDL_RenderCopy(renderer, textures->tex_clouds, NULL, &rect);
+	rect = (SDL_Rect) {
+		.x = cloud_offset - 640,
+		.y = 0,
+		.w = 640,
+		.h = 480,
+	};
+	SDL_RenderCopy(renderer, textures->tex_clouds, NULL, &rect);
+
+	cloud_offset++;
 
 	struct MapData* map_data = state->map_data;
 	for (int y = MAP_SIZE_Y - 1; y >= 0; y--) {

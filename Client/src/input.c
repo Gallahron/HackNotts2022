@@ -11,6 +11,7 @@
 struct InputManager* input_mgr_init();
 void input_mgr_destroy(struct InputManager* input_mgr);
 void keypress(struct InputManager* input_mgr, SDL_Keycode keycode, bool keydown);
+bool inputs_compare(struct Inputs* one, struct Inputs* two);
 
 struct InputManager* input_mgr_init()
 {
@@ -45,10 +46,21 @@ void keypress(struct InputManager* input_mgr, SDL_Keycode keycode, bool keydown)
 {
 	pthread_mutex_lock(&input_mgr->mutex);
 	switch (keycode) {
-	case SDLK_LEFT: input_mgr->left = keydown; break;
-	case SDLK_RIGHT: input_mgr->right = keydown; break;
-	case SDLK_UP: input_mgr->jump = keydown; break;
-	case SDLK_SPACE: input_mgr->shoot = keydown; break;
+	case SDLK_LEFT: input_mgr->inputs.left = keydown; break;
+	case SDLK_RIGHT: input_mgr->inputs.right = keydown; break;
+	case SDLK_UP: input_mgr->inputs.jump = keydown; break;
+	case SDLK_SPACE: input_mgr->inputs.shoot = keydown; break;
 	}
 	pthread_mutex_unlock(&input_mgr->mutex);
+}
+
+bool inputs_compare(struct Inputs* one, struct Inputs* two)
+{
+	if (one->left == two->left)
+		if (one->right == two->right)
+			if (one->jump == two->jump)
+				if (one->shoot == two->shoot)
+					return true;
+
+	return false;
 }

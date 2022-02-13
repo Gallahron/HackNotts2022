@@ -5,16 +5,14 @@
 #include <stddef.h>
 #include <pthread.h>
 
+#include "map.h"
+
 #define MAX_PLAYERS 16
 #define MAX_BULLETS 256
 
 enum BulletType {
 	BL_STANDARD = 0,
 	BL_BOMB,
-};
-
-enum Map {
-	MP_STANDARD = 0,
 };
 
 struct Entity {
@@ -34,11 +32,11 @@ struct Bullet {
 };
 
 struct State {
-	// bool playing;
-	// double pos_x;
-	// double pos_y;
+	bool playing;
+	double pos_x;
+	double pos_y;
 	/* new state */
-	enum Map map;
+	struct MapData* map_data;
 	struct Player players[MAX_PLAYERS];
 	struct Bullet bullets[MAX_BULLETS];
 	size_t player_count, bullet_count;

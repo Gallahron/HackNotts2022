@@ -18,12 +18,14 @@ public class GameController {
     Server server;
     Arena map;
 
+    float gravity = -4;
+
     float deltaTime;
     long oldTime;
 
     public GameController(Server server) {
         this.server = server;
-        entities.add(new Bullet(0,2,1,1));
+        //entities.add(new Bullet(0.04f,2,1,1));
         map = new Arena();
         updateTime();
     }
@@ -38,9 +40,9 @@ public class GameController {
                 handlePhysics();
 
                 outputData();
-                draw();
+                //draw();
 
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.MILLISECONDS.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -59,13 +61,13 @@ public class GameController {
             InputStates.available.acquire();
             for (int i = 1; i < PlayerManager.currPlayer; i++) {
                 if (i > players.size()) {
-                    Player player = new Player(i,0,0,0,1);
+                    Player player = new Player(i, 2, 2f, 0, 0);
                     players.add(player);
                     entities.add(player);
                 }
                 InputState state = InputStates.GetState(i);
                 Player player = players.get(i-1);
-                player.setXSpeed(player.MAX_SPEED * (state.GetState("R") - state.GetState("L")));
+                //player.setXSpeed(player.MAX_SPEED * (state.GetState("R") - state.GetState("L")));
             }
             InputStates.available.release();
         } catch (InterruptedException e) {}
@@ -81,7 +83,7 @@ public class GameController {
                 case (0) -> display = '0';
                 case (1) -> display = '-';
             }
-            out[(int)(map.maxArenaY - (entity.getYPos()) % map.maxArenaY) - 1].setCharAt((int)(entity.getXPos()) % map.maxArenaX, display);
+            out[(int)(map.maxArenaY - (entity.getYPos()) % map.maxArenaY)].setCharAt((int)(entity.getXPos()) % map.maxArenaX, display);
         }
         System.out.println(deltaTime);
         System.out.println("-----------");
@@ -97,18 +99,26 @@ public class GameController {
             float prevX = entity.getXPos();
             float prevY = entity.getYPos();
             boolean collided = false;
+            if (entity.useGravity) {
+                entity.modYSpeed(gravity * deltaTime);
+                if (entity.grounded) entity.setYSpeed(10);
+            }
             entity.move(deltaTime);
+            entity.setXRad(entity.getXRad() % map.maxArenaX);
+            entity.grounded = false;
             for (Block other:map.blocks) {
                 int dir = entity.isCollided(other);
-                if (dir == 1) {
+                if (dir % 2 == 1) {
                     entity.setYPos(prevY);
                     entity.setYSpeed(0);
-                }
-                if (dir == 2) {
+                    System.out.println("Yzz");
+                    if (dir == 1) entity.grounded = true;
+                } else if (dir % 2 == 0) {
                     entity.setXPos((prevX));
                     entity.setXSpeed(0);
+                    System.out.println("X");
                 }
-                if (dir != 0) {
+                if (dir != -1) {
                     System.out.println("BLOCK: " + other.getXPos() + " " + other.getYPos());
                     break;
                 }

@@ -110,6 +110,7 @@ public class GameController {
         }
         message += "]";
 
+        System.out.println(message);
         for (NetworkPlayer i : PlayerManager.playerLookup.values()) {
             server.SendMessage(message, i.getAddress(), i.getPort());
         }

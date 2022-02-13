@@ -14,7 +14,7 @@ void render(struct State* state, SDL_Renderer* renderer)
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
 	SDL_Rect rect = {
-		.x = ((state->pos_x / 20.0) * 640),
+		.x = (4 * 640),
 		.y = 224,
 		.w = 32,
 		.h = 32,

@@ -24,6 +24,7 @@ struct Entity {
 
 struct Player {
 	struct Entity entity;
+	unsigned int player_number;
 	unsigned int lives;
 };
 
@@ -34,9 +35,9 @@ struct Bullet {
 };
 
 struct State {
-	// bool playing;
-	// double pos_x;
-	// double pos_y;
+	bool playing;
+	double pos_x;
+	double pos_y;
 	/* new state */
 	enum Map map;
 	struct Player players[MAX_PLAYERS];

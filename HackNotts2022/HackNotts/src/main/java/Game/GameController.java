@@ -16,13 +16,15 @@ public class GameController {
     ArrayList<Entity> entities = new ArrayList<Entity>();
     ArrayList<Player> players = new ArrayList<Player>();
     Server server;
+    Arena map;
 
     float deltaTime;
     long oldTime;
 
     public GameController(Server server) {
         this.server = server;
-        entities.add(new Bullet(0,0,32,0));
+        entities.add(new Bullet(0,2,1,1));
+        map = new Arena();
         updateTime();
     }
 
@@ -36,7 +38,7 @@ public class GameController {
                 handlePhysics();
 
                 outputData();
-                //draw();
+                draw();
 
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -57,7 +59,7 @@ public class GameController {
             InputStates.available.acquire();
             for (int i = 1; i < PlayerManager.currPlayer; i++) {
                 if (i > players.size()) {
-                    Player player = new Player(i,0,0,0,32);
+                    Player player = new Player(i,0,0,0,1);
                     players.add(player);
                     entities.add(player);
                 }
@@ -71,7 +73,7 @@ public class GameController {
 
     void draw() {
         StringBuilder[] out = new StringBuilder[15];
-        for (int i = 0; i < 15; i++) out[i] = new StringBuilder("                      ");
+        for (int i = 0; i < 15; i++) out[i] = new StringBuilder(map.mapData[i]);
 
         for (Entity entity : entities) {
             char display = ' ';
@@ -79,7 +81,7 @@ public class GameController {
                 case (0) -> display = '0';
                 case (1) -> display = '-';
             }
-            out[(int)(entity.getYPos() / 32) % 15].setCharAt((int)(entity.getXPos() / 32) % 20, display);
+            out[(int)(map.maxArenaY - (entity.getYPos()) % map.maxArenaY) - 1].setCharAt((int)(entity.getXPos()) % map.maxArenaX, display);
         }
         System.out.println(deltaTime);
         System.out.println("-----------");
@@ -91,8 +93,42 @@ public class GameController {
 
     void handlePhysics() {
         for (Entity entity : entities) {
+            System.out.println("ENTITY: " + entity.getXPos() + " " + entity.getYPos());
+            float prevX = entity.getXPos();
+            float prevY = entity.getYPos();
+            boolean collided = false;
             entity.move(deltaTime);
-            //System.out.println(entity.getXPos());
+            for (Block other:map.blocks) {
+                int dir = entity.isCollided(other);
+                if (dir == 1) {
+                    entity.setYPos(prevY);
+                    entity.setYSpeed(0);
+                }
+                if (dir == 2) {
+                    entity.setXPos((prevX));
+                    entity.setXSpeed(0);
+                }
+                if (dir != 0) {
+                    System.out.println("BLOCK: " + other.getXPos() + " " + other.getYPos());
+                    break;
+                }
+            }
+            for (Entity other:entities) {
+                if (other == entity) continue;
+                int dir = entity.isCollided(other);
+                if (dir == 1) {
+                    entity.setYPos(prevY);
+                    entity.setYSpeed(0);
+                } else if (dir == 2) {
+                    entity.setXPos((prevX));
+                    entity.setXSpeed(0);
+                }
+                if (dir != 0) {
+                    System.out.println("HIT! MAP" + dir);
+                    break;
+                }
+
+            }
         }
     }
 
@@ -110,7 +146,7 @@ public class GameController {
         }
         message += "]";
 
-        System.out.println(message);
+        //System.out.println(message);
         for (NetworkPlayer i : PlayerManager.playerLookup.values()) {
             server.SendMessage(message, i.getAddress(), i.getPort());
         }

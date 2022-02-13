@@ -58,7 +58,7 @@ bool parse_msg(struct State* state, const char* msg, size_t msg_len)
 
 	*/
 
-	return true;
+	//return true;
 
 	
 
